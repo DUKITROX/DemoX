@@ -1,0 +1,11 @@
+/venv
+.venv/
+__pycache__/
+.env
+.vscode/
+.cursor/
+.vite/
+node_modules/
+auth_state.json
+*.png
+*.jpg
