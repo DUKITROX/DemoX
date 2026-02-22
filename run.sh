@@ -10,7 +10,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== Demogorgux Startup ===${NC}"
+echo -e "${GREEN}=== DemoX Startup ===${NC}"
 
 # --- 1. Check .env ---
 if [ ! -f .env ]; then
@@ -52,7 +52,7 @@ echo -e "${GREEN}[OK]${NC} Playwright browsers ready"
 echo ""
 echo "Building frontend..."
 cd frontend
-npm install --silent 2>/dev/null
+npm ci --silent 2>/dev/null || npm install --silent 2>/dev/null
 npm run build
 cd "$SCRIPT_DIR"
 echo -e "${GREEN}[OK]${NC} Frontend built"
@@ -60,7 +60,7 @@ echo -e "${GREEN}[OK]${NC} Frontend built"
 # --- 6. Start server ---
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  Demogorgux running on http://localhost:8000${NC}"
+echo -e "${GREEN}  DemoX running on http://localhost:8000${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo "Press Ctrl+C to stop."
 echo ""

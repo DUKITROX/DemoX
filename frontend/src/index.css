@@ -17,9 +17,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: #d1d5db;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #9ca3af;
 }

@@ -54,7 +54,7 @@ export default function ScreenShare({ screenshot, cursorPos }) {
   }, [screenshot])
 
   return (
-    <div ref={containerRef} className="flex-1 flex items-center justify-center bg-black p-4 overflow-hidden relative">
+    <div ref={containerRef} className="flex-1 flex items-center justify-center bg-gray-100 p-4 overflow-hidden relative">
       {screenshot ? (
         <>
           {/* Previous screenshot fading out during crossfade */}
@@ -62,7 +62,7 @@ export default function ScreenShare({ screenshot, cursorPos }) {
             <img
               src={fadingOut}
               alt=""
-              className="absolute max-w-full max-h-full rounded-lg border border-gray-700 shadow-2xl pointer-events-none"
+              className="absolute max-w-full max-h-full rounded-lg border border-gray-200 shadow-lg pointer-events-none"
               style={{
                 animation: 'screenshotFadeOut 0.5s ease-out forwards',
               }}
@@ -72,7 +72,7 @@ export default function ScreenShare({ screenshot, cursorPos }) {
             ref={imgRef}
             src={screenshot}
             alt="Agent screen"
-            className="max-w-full max-h-full rounded-lg border border-gray-700 shadow-2xl"
+            className="max-w-full max-h-full rounded-lg border border-gray-200 shadow-lg"
             decoding="async"
             style={{
               transition: 'opacity 0.3s ease-in',
@@ -103,7 +103,7 @@ export default function ScreenShare({ screenshot, cursorPos }) {
                 top: imgScale.offsetY + pos.y * imgScale.scaleY,
                 width: 4,
                 height: 4,
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
                 opacity: 0.15 + (i / cursorTrail.length) * 0.25,
                 transition: 'opacity 0.2s ease-out',
                 zIndex: 9,
@@ -138,8 +138,8 @@ export default function ScreenShare({ screenshot, cursorPos }) {
           )}
         </>
       ) : (
-        <div className="text-gray-500 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center">
+        <div className="text-gray-400 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-200 flex items-center justify-center">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>

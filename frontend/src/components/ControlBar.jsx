@@ -12,15 +12,15 @@ export default function ControlBar({
   chatOnly = false,
 }) {
   return (
-    <div className="h-16 bg-gray-900 border-t border-gray-800 flex items-center px-6 gap-3">
+    <div className="h-16 bg-white border-t border-gray-200 flex items-center px-6 gap-3">
       {!chatOnly && (
         <button
           onClick={onToggleMic}
           disabled={!micSupported || isTranscribing}
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors relative ${
             isMicOn
-              ? 'bg-white text-gray-900'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ? 'bg-mint text-white'
+              : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
           } ${isTranscribing ? 'animate-pulse' : ''} ${!micSupported ? 'opacity-40 cursor-not-allowed' : ''}`}
           title={isTranscribing ? 'Transcribing...' : !micSupported ? 'Microphone not available' : isMicOn ? 'Mute mic' : 'Unmute mic'}
         >
@@ -42,8 +42,8 @@ export default function ControlBar({
         onClick={onToggleAudio}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
           isAudioOn
-            ? 'bg-white text-gray-900'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            ? 'bg-mint text-white'
+            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
         }`}
         title={isAudioOn ? 'Mute agent audio' : 'Unmute agent audio'}
       >
@@ -67,8 +67,8 @@ export default function ControlBar({
         onClick={onToggleCamera}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
           isCameraOn
-            ? 'bg-white text-gray-900'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            ? 'bg-mint text-white'
+            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
         }`}
         title={isCameraOn ? 'Turn off camera' : 'Turn on camera'}
       >
@@ -91,8 +91,8 @@ export default function ControlBar({
         onClick={onToggleChat}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
           isChatOpen
-            ? 'bg-white text-gray-900'
-            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            ? 'bg-mint text-white'
+            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
         }`}
         title={isChatOpen ? 'Close chat' : 'Open chat'}
       >

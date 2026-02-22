@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Demogorgux is an AI-powered automated product demonstration system using Claude's Computer Use capabilities. An agent persona ("Demogorgux", a Sales Engineer) navigates web applications via headless browser, answers questions, and demos features through a real-time streaming interface. Currently configured to demo Monkeytype (monkeytype.com).
+DemoX is an AI-powered automated product demonstration system using Claude's Computer Use capabilities. An agent persona ("DemoX", a Sales Engineer) navigates web applications via headless browser, answers questions, and demos features through a real-time streaming interface. Currently configured to demo Monkeytype (monkeytype.com).
 
 ## Commands
 

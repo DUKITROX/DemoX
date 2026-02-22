@@ -1,4 +1,4 @@
-# Demogorgux
+# DemoX
 
 AI-powered automated product demonstration system. An agent persona navigates web applications via a headless browser, answers questions, and demos features through a real-time streaming interface — all powered by Claude's Computer Use capabilities.
 
@@ -36,7 +36,7 @@ This will automatically:
 - Build the React frontend
 - Start the server
 
-> **Note:** The first run takes a bit longer since it needs to install dependencies and build the frontend. Wait until you see `Demogorgux running on http://localhost:8000` before opening the browser.
+> **Note:** The first run takes a bit longer since it needs to install dependencies and build the frontend. Wait until you see `DemoX running on http://localhost:8000` before opening the browser.
 
 4. Open [http://localhost:8000](http://localhost:8000) and click **Launch Demo**.
 

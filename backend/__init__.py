@@ -1,1 +1,1 @@
-"""Backend package for the Demogorgux demo agent."""
+"""Backend package for the DemoX demo agent."""

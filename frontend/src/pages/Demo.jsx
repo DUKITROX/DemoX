@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import ScreenShare from '../components/ScreenShare'
 import ChatPanel from '../components/ChatPanel'
 import ControlBar from '../components/ControlBar'
@@ -10,6 +10,7 @@ import useAudio from '../hooks/useAudio'
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
 export default function Demo() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const targetUrl = searchParams.get('url') || ''
   const [isJoining, setIsJoining] = useState(true)
@@ -115,25 +116,22 @@ export default function Demo() {
 
   if (isJoining) {
     return (
-      <div className="h-screen bg-gray-950 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
-
+      <div className="h-screen bg-gray-50 flex flex-col items-center justify-center relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center animate-fade-in">
           {/* Animated logo ring */}
           <div className="relative w-28 h-28 mb-8">
-            <div className="absolute inset-0 rounded-full border-2 border-blue-500/20" />
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-500 animate-spin-slow" />
-            <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-blue-400/60 animate-spin-slow-reverse" />
+            <div className="absolute inset-0 rounded-full border-2 border-mint-light" />
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-mint animate-spin-slow" />
+            <div className="absolute inset-2 rounded-full border-2 border-transparent border-b-mint animate-spin-slow-reverse" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-blue-600/20 flex items-center justify-center backdrop-blur-sm">
-                <span className="text-blue-400 text-2xl font-bold">D</span>
+              <div className="w-16 h-16 rounded-full bg-mint-light flex items-center justify-center">
+                <span className="text-mint-dark text-2xl font-bold">D</span>
               </div>
             </div>
-            <div className="absolute inset-0 rounded-full bg-blue-500/5 animate-pulse-slow" />
           </div>
 
-          <p className="text-white text-lg font-medium mb-2">
-            Waiting for Demogorgux to join the call
+          <p className="text-gray-900 text-lg font-medium mb-2">
+            Waiting for DemoX to join the call
           </p>
           <p className="text-gray-500 text-sm">
             Preparing your demo{targetUrl ? ` of ${new URL(targetUrl.startsWith('http') ? targetUrl : 'https://' + targetUrl).hostname}` : ''}...
@@ -141,9 +139,9 @@ export default function Demo() {
 
           {/* Animated dots */}
           <div className="flex gap-1.5 mt-6">
-            <div className="w-2 h-2 rounded-full bg-blue-500/60 animate-bounce-dot" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 rounded-full bg-blue-500/60 animate-bounce-dot" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 rounded-full bg-blue-500/60 animate-bounce-dot" style={{ animationDelay: '300ms' }} />
+            <div className="w-2 h-2 rounded-full bg-mint animate-bounce-dot" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 rounded-full bg-mint animate-bounce-dot" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 rounded-full bg-mint animate-bounce-dot" style={{ animationDelay: '300ms' }} />
           </div>
         </div>
 
@@ -167,13 +165,6 @@ export default function Demo() {
           .animate-spin-slow-reverse {
             animation: spin-slow-reverse 4s linear infinite;
           }
-          @keyframes pulse-slow {
-            0%, 100% { opacity: 0; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.15); }
-          }
-          .animate-pulse-slow {
-            animation: pulse-slow 2.5s ease-in-out infinite;
-          }
           @keyframes bounce-dot {
             0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
             40% { transform: translateY(-8px); opacity: 1; }
@@ -187,22 +178,41 @@ export default function Demo() {
   }
 
   return (
-    <div className="h-screen bg-gray-950 flex animate-call-enter">
+    <div className="h-screen bg-gray-50 flex animate-call-enter">
       {/* Left: screen share + controls */}
       <div className="flex-1 flex flex-col relative">
         <ScreenShare screenshot={latestScreenshot} cursorPos={cursorPos} />
 
+        {/* Back button */}
+        <button
+          onClick={() => {
+            interruptCurrentResponse()
+            clearAudioQueue()
+            if (streamRef.current) {
+              streamRef.current.getTracks().forEach(t => t.stop())
+              streamRef.current = null
+            }
+            navigate('/')
+          }}
+          className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors text-sm flex items-center gap-1.5 shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+
         {/* Participants panel overlay */}
         <div className="absolute top-4 right-4 flex gap-2 z-20">
-          {/* Demogorgux tile */}
-          <div className="w-28 h-20 rounded-lg bg-gray-800/90 border border-gray-700 flex flex-col items-center justify-center backdrop-blur-sm">
-            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center mb-1">
+          {/* DemoX tile */}
+          <div className="w-28 h-20 rounded bg-gray-200 border border-gray-300 flex flex-col items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-mint flex items-center justify-center mb-1">
               <span className="text-white text-xs font-semibold">D</span>
             </div>
-            <span className="text-gray-400 text-[10px]">Demogorgux</span>
+            <span className="text-gray-500 text-[10px]">DemoX</span>
           </div>
           {/* You tile */}
-          <div className="w-28 h-20 rounded-lg bg-gray-800/90 border border-gray-700 flex flex-col items-center justify-center overflow-hidden relative backdrop-blur-sm">
+          <div className="w-28 h-20 rounded bg-gray-200 border border-gray-300 flex flex-col items-center justify-center overflow-hidden relative">
             {isCameraOn ? (
               <>
                 <video
@@ -217,10 +227,10 @@ export default function Demo() {
               </>
             ) : (
               <>
-                <div className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center mb-1">
+                <div className="w-9 h-9 rounded-full bg-gray-400 flex items-center justify-center mb-1">
                   <span className="text-white text-xs font-semibold">Y</span>
                 </div>
-                <span className="text-gray-400 text-[10px]">You</span>
+                <span className="text-gray-500 text-[10px]">You</span>
               </>
             )}
           </div>

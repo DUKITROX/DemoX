@@ -32,31 +32,28 @@ export default function SavingsCalculator() {
   }
 
   const inputClass =
-    'w-full px-5 py-3.5 bg-gray-800/80 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors text-base'
+    'w-full px-5 py-3.5 bg-gray-100 border border-black rounded text-gray-900 placeholder-gray-400 focus:outline-none focus:border-mint focus:ring-1 focus:ring-mint transition-colors text-base'
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl" />
-
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center relative overflow-hidden">
       <div className="relative z-10 w-full max-w-md mx-auto px-4">
         <button
           onClick={() => navigate('/')}
-          className="text-gray-400 hover:text-white transition-colors mb-8 flex items-center gap-2"
+          className="text-gray-500 hover:text-gray-900 transition-colors mb-8 flex items-center gap-2"
         >
           &larr; Back
         </button>
 
-        <h1 className="text-4xl font-bold text-white tracking-tight mb-2 text-center">
+        <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2 text-center">
           Savings Calculator
         </h1>
-        <p className="text-gray-400 mb-8 text-center">
-          See how much time and money Demogorgux saves you
+        <p className="text-gray-500 mb-8 text-center">
+          See how much time and money DemoX could save you
         </p>
 
         <div className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Demos per week</label>
+            <label className="block text-sm text-gray-500 mb-1.5">Demos per week</label>
             <input
               type="number"
               min="0"
@@ -68,7 +65,7 @@ export default function SavingsCalculator() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Hours per demo</label>
+            <label className="block text-sm text-gray-500 mb-1.5">Hours per demo</label>
             <input
               type="number"
               min="0"
@@ -81,7 +78,7 @@ export default function SavingsCalculator() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Billing rate ($/hr)</label>
+            <label className="block text-sm text-gray-500 mb-1.5">Billing rate ($/hr)</label>
             <input
               type="number"
               min="0"
@@ -95,7 +92,7 @@ export default function SavingsCalculator() {
           <button
             onClick={handleCalculate}
             disabled={!demosPerWeek || !hoursPerDemo || !billingRate}
-            className="w-full px-8 py-4 bg-green-600 hover:bg-green-500 text-white text-lg font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-green-600 disabled:cursor-not-allowed mt-2"
+            className="w-full px-8 py-4 bg-mint hover:bg-mint-hover text-white text-lg font-semibold rounded transition-all duration-200 hover:shadow-md disabled:opacity-40 disabled:hover:bg-mint disabled:cursor-not-allowed mt-2"
           >
             Calculate
           </button>
@@ -103,27 +100,27 @@ export default function SavingsCalculator() {
 
         {results && (
           <div
-            className="mt-8 p-6 bg-gray-800/60 border border-gray-700 rounded-xl transition-all duration-700 ease-out"
+            className="mt-8 p-6 bg-gray-100 border border-gray-300 rounded transition-all duration-700 ease-out"
             style={{
               opacity: showResults ? 1 : 0,
               transform: showResults ? 'translateY(0)' : 'translateY(20px)',
             }}
           >
-            <h2 className="text-lg font-semibold text-white mb-4 text-center">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 text-center">
               Your Annual Savings
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                <p className="text-3xl font-bold text-green-400">
+              <div className="text-center p-4 bg-gray-200 rounded">
+                <p className="text-3xl font-bold text-mint">
                   {results.hoursSaved.toLocaleString()}
                 </p>
-                <p className="text-sm text-gray-400 mt-1">Hours saved</p>
+                <p className="text-sm text-gray-500 mt-1">Hours saved</p>
               </div>
-              <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-                <p className="text-3xl font-bold text-green-400">
+              <div className="text-center p-4 bg-gray-200 rounded">
+                <p className="text-3xl font-bold text-mint">
                   ${results.moneySaved.toLocaleString()}
                 </p>
-                <p className="text-sm text-gray-400 mt-1">Money saved</p>
+                <p className="text-sm text-gray-500 mt-1">Money saved</p>
               </div>
             </div>
           </div>

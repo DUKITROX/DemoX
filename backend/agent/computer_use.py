@@ -30,7 +30,7 @@ from backend.browser.actions import execute_computer_action, get_action_coordina
 
 logger = logging.getLogger(__name__)
 
-COMPUTER_USE_MODEL = "claude-sonnet-4-20250514"
+COMPUTER_USE_MODEL = "claude-opus-4-20250514"
 INTENT_GUARD_MODEL = "claude-haiku-4-5-20251001"
 
 # The Computer Use tool definition
