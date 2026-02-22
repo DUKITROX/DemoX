@@ -241,7 +241,7 @@ async def run_computer_use_loop(
             "type": "image",
             "source": {
                 "type": "base64",
-                "media_type": "image/jpeg",
+                "media_type": "image/png",
                 "data": screenshot_b64,
             },
         },
@@ -390,7 +390,7 @@ async def run_computer_use_loop(
                             "type": "image",
                             "source": {
                                 "type": "base64",
-                                "media_type": "image/jpeg",
+                                "media_type": "image/png",
                                 "data": new_screenshot,
                             },
                         },

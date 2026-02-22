@@ -241,7 +241,7 @@ async def take_screenshot() -> str:
         """)
     except Exception:
         pass
-    screenshot_bytes = await _page.screenshot(type="jpeg", quality=80)
+    screenshot_bytes = await _page.screenshot(type="png")
     # Restore the fake cursor after capturing (still needed for position tracking)
     try:
         await _page.evaluate("""

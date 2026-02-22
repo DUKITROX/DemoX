@@ -39,25 +39,29 @@ export default function Landing() {
             placeholder="Enter a website URL to demo (e.g. https://example.com)"
             className="w-full px-5 py-3.5 bg-gray-800/80 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-base"
           />
-          <button
-            onClick={handleLaunch}
-            disabled={!url.trim()}
-            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white text-lg font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-blue-600 disabled:cursor-not-allowed"
-          >
-            Launch Demo
-          </button>
-
-          <div className="flex items-center gap-3 w-full mt-2">
-            <div className="flex-1 h-px bg-gray-700" />
-            <span className="text-gray-500 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-700" />
+          <div className="flex items-center gap-4 w-full">
+            <button
+              onClick={handleLaunch}
+              disabled={!url.trim()}
+              className="flex-1 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-base font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-blue-600 disabled:cursor-not-allowed"
+            >
+              Launch Demo
+            </button>
+            <button
+              onClick={() => navigate('/demo?url=' + encodeURIComponent('https://monkeytype.com'))}
+              className="flex-1 px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white text-base font-semibold rounded-xl border border-gray-700 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/20"
+            >
+              Demo Monkeytype
+            </button>
           </div>
 
+          <div className="w-full h-px bg-gray-700 mt-6" />
+
           <button
-            onClick={() => navigate('/demo?url=' + encodeURIComponent('https://monkeytype.com'))}
-            className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium rounded-xl border border-gray-700 transition-all duration-200 hover:scale-105"
+            onClick={() => navigate('/savings')}
+            className="w-full px-8 py-3 bg-gradient-to-r from-green-800 via-emerald-700 to-green-800 hover:from-green-700 hover:via-emerald-600 hover:to-green-700 text-green-50 text-base font-semibold rounded-xl border border-green-600/30 transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-green-800/30 mt-4"
           >
-            Demo Monkeytype
+            Calculate Savings
           </button>
         </div>
       </div>

@@ -31,25 +31,24 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
 fi
 echo -e "${GREEN}[OK]${NC} .env loaded"
 
-# --- 2. Python virtual env + deps ---
-if [ -d ".venv" ]; then
-    source .venv/bin/activate
-    echo -e "${GREEN}[OK]${NC} Virtual environment activated"
-elif [ -d "venv" ]; then
-    source venv/bin/activate
-    echo -e "${GREEN}[OK]${NC} Virtual environment activated"
-else
-    echo -e "${YELLOW}[WARN]${NC} No .venv found, using system Python"
+# --- 2. Create virtual env if it doesn't exist, then activate ---
+if [ ! -d ".venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv .venv
+    echo -e "${GREEN}[OK]${NC} Virtual environment created"
 fi
+source .venv/bin/activate
+echo -e "${GREEN}[OK]${NC} Virtual environment activated"
 
+# --- 3. Install Python dependencies ---
 pip install -q -r requirements.txt 2>/dev/null
 echo -e "${GREEN}[OK]${NC} Python dependencies installed"
 
-# --- 3. Playwright browsers ---
+# --- 4. Playwright browsers ---
 python -m playwright install chromium --with-deps 2>/dev/null || python -m playwright install chromium 2>/dev/null || true
 echo -e "${GREEN}[OK]${NC} Playwright browsers ready"
 
-# --- 4. Build frontend ---
+# --- 5. Build frontend ---
 echo ""
 echo "Building frontend..."
 cd frontend
@@ -58,7 +57,7 @@ npm run build
 cd "$SCRIPT_DIR"
 echo -e "${GREEN}[OK]${NC} Frontend built"
 
-# --- 5. Start server ---
+# --- 6. Start server ---
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  Demogorgux running on http://localhost:8000${NC}"

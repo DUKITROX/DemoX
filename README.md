@@ -1,56 +1,50 @@
-# demogorgux
+# Demogorgux
 
-AI demo agent that joins a simulated call, shares a virtual browser screen, and answers via chat while navigating the product.
-
-## Architecture
-
-- `backend/`: FastAPI + Playwright + Anthropic Computer Use loop
-- `frontend/`: React "video call simulation" UI
-- Integrated mode: FastAPI serves the built frontend and API from one app (`http://localhost:8000`)
+AI-powered automated product demonstration system. An agent persona navigates web applications via a headless browser, answers questions, and demos features through a real-time streaming interface — all powered by Claude's Computer Use capabilities.
 
 ## Prerequisites
 
 - Python 3.10+
 - Node.js 18+
-- `ANTHROPIC_API_KEY` in `.env`
+- An [Anthropic API key](https://console.anthropic.com/)
 
-Optional (for starting already logged in to Monkeytype):
-- `DEMO_LOGIN_EMAIL` in `.env`
-- `DEMO_LOGIN_PASSWORD` in `.env`
+## Setup
 
-## Install
+1. Clone the repository:
 
 ```bash
-pip install -r requirements.txt
-cd frontend && npm install
+git clone https://github.com/DUKITROX/demogorgux.git
+cd demogorgux
 ```
 
-## Run Integrated App (recommended)
+2. Create a `.env` file in the project root with your API key:
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+3. Run the app:
 
 ```bash
-cd frontend && npm run build
-cd ..
-uvicorn backend.server.api:app --reload --host 0.0.0.0 --port 8000
+./run.sh
 ```
 
-Open `http://localhost:8000` and click **Launch Demo**.
+This will automatically:
+- Create a Python virtual environment (`.venv`)
+- Install all Python dependencies from `requirements.txt`
+- Download the Playwright Chromium browser
+- Build the React frontend
+- Start the server
 
-### Notes
+> **Note:** The first run takes a bit longer since it needs to install dependencies and build the frontend. Wait until you see `Demogorgux running on http://localhost:8000` before opening the browser.
 
-- On first successful login, browser session state is saved to `auth_state.json` and reused automatically on next runs.
-- If your Anthropic SDK version does not support the `betas` argument, the backend now falls back automatically.
+4. Open [http://localhost:8000](http://localhost:8000) and click **Launch Demo**.
 
-## Run Split Dev Mode (optional)
+## Optional environment variables
 
-Terminal 1:
-```bash
-uvicorn backend.server.api:app --reload --host 0.0.0.0 --port 8000
+You can also add these to your `.env` file to start already logged in to Monkeytype:
+
 ```
-
-Terminal 2:
-```bash
-cd frontend
-npm run dev
+DEMO_LOGIN_EMAIL=your-email@example.com
+DEMO_LOGIN_PASSWORD=your-password
 ```
-
-Open `http://localhost:5173`.
