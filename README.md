@@ -1,12 +1,13 @@
 # DemoX
 
-AI-powered automated product demonstration system. An agent persona navigates web applications via a headless browser, answers questions, and demos features through a real-time streaming interface — all powered by Claude's Computer Use capabilities.
+AI agent for automating demos so you can focus on things that matter.
 
 ## Prerequisites
 
 - Python 3.10+
 - Node.js 18+
 - An [Anthropic API key](https://console.anthropic.com/)
+- An [Eleven labs API key](https://elevenlabs.io/)
 
 ## Setup
 
@@ -21,6 +22,7 @@ cd demogorgux
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
+ELEVENLABS_API_KEY=sk_...
 ```
 
 3. Run the app:
@@ -43,8 +45,3 @@ This will automatically:
 ## Optional environment variables
 
 You can also add these to your `.env` file to start already logged in to Monkeytype:
-
-```
-DEMO_LOGIN_EMAIL=your-email@example.com
-DEMO_LOGIN_PASSWORD=your-password
-```
