@@ -15,58 +15,90 @@ echo -e "${GREEN}=== DemoX Startup ===${NC}"
 # --- 1. Check .env ---
 if [ ! -f .env ]; then
     echo -e "${RED}ERROR: .env file not found.${NC}"
-    echo "Create a .env file with at least:"
-    echo "  ANTHROPIC_API_KEY=sk-ant-..."
+    echo "Create a .env file with required API keys (see plan.md)"
     exit 1
 fi
 
-# Source .env to check values
 set -a
 source .env
 set +a
 
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo -e "${RED}ERROR: ANTHROPIC_API_KEY is not set in .env${NC}"
-    exit 1
-fi
-echo -e "${GREEN}[OK]${NC} .env loaded"
+for var in ANTHROPIC_API_KEY LIVEKIT_URL LIVEKIT_API_KEY LIVEKIT_API_SECRET DEEPGRAM_API_KEY ELEVENLABS_API_KEY; do
+    if [ -z "${!var}" ]; then
+        echo -e "${RED}ERROR: $var is not set in .env${NC}"
+        exit 1
+    fi
+done
+echo -e "${GREEN}[OK]${NC} .env loaded — all keys present"
 
-# --- 2. Create virtual env if it doesn't exist, then activate ---
+# --- 2. Virtual environment ---
 if [ ! -d ".venv" ]; then
     echo "Creating virtual environment..."
     python3 -m venv .venv
-    echo -e "${GREEN}[OK]${NC} Virtual environment created"
 fi
 source .venv/bin/activate
 echo -e "${GREEN}[OK]${NC} Virtual environment activated"
 
 # --- 3. Install Python dependencies ---
-pip install -q -r requirements.txt 2>/dev/null
+pip install -q -r backend/requirements.txt -r presenter_agent/requirements.txt -r researcher_agent/requirements.txt 2>/dev/null
 echo -e "${GREEN}[OK]${NC} Python dependencies installed"
 
 # --- 4. Playwright browsers ---
-python -m playwright install chromium --with-deps 2>/dev/null || python -m playwright install chromium 2>/dev/null || true
+python -m playwright install chromium 2>/dev/null || true
 echo -e "${GREEN}[OK]${NC} Playwright browsers ready"
 
-# --- 5. Build frontend ---
-echo ""
+# --- 5. Check Redis ---
+if ! command -v redis-cli &>/dev/null || ! redis-cli ping &>/dev/null; then
+    echo -e "${YELLOW}[WARN]${NC} Redis not running. Starting with Docker..."
+    docker run -d --name demox-redis -p 6379:6379 redis:7-alpine 2>/dev/null || true
+    sleep 1
+fi
+echo -e "${GREEN}[OK]${NC} Redis ready"
+
+# --- 6. Build frontend ---
 echo "Building frontend..."
 cd frontend
-npm ci --silent 2>/dev/null || npm install --silent 2>/dev/null
-npm run build
+npm install --silent 2>/dev/null
+npm run build 2>/dev/null
 cd "$SCRIPT_DIR"
 echo -e "${GREEN}[OK]${NC} Frontend built"
 
-# --- 6. Start server ---
+# --- 7. Start all services ---
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  DemoX running on http://localhost:8000${NC}"
-echo -e "${GREEN}========================================${NC}"
-echo "Press Ctrl+C to stop."
+echo -e "${GREEN}=========================================${NC}"
+echo -e "${GREEN}  Starting DemoX services...${NC}"
+echo -e "${GREEN}=========================================${NC}"
+echo ""
+echo "  Backend API:       http://localhost:8000"
+echo "  Frontend:          http://localhost:3000"
+echo "  Presenter Agent:   LiveKit worker (auto-dispatched)"
+echo ""
+echo "Press Ctrl+C to stop all services."
 echo ""
 
-# Open browser after a short delay
-(sleep 2 && open "http://localhost:8000" 2>/dev/null || xdg-open "http://localhost:8000" 2>/dev/null || true) &
+# Trap to kill all background processes
+trap 'echo "Shutting down..."; kill $(jobs -p) 2>/dev/null; exit 0' INT TERM
 
-# Run uvicorn from repo root so "backend.server.api" imports work
-exec uvicorn backend.server.api:app --host 0.0.0.0 --port 8000
+# Start backend
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
+echo -e "${GREEN}[OK]${NC} Backend started on :8000"
+
+# Kill any orphaned presenter agent processes from previous runs
+pkill -f "presenter_agent.agent" 2>/dev/null || true
+sleep 1
+
+# Start presenter agent worker
+.venv/bin/python -m presenter_agent.agent dev &
+echo -e "${GREEN}[OK]${NC} Presenter agent worker started"
+
+# Start frontend
+cd frontend && npm run dev &
+cd "$SCRIPT_DIR"
+echo -e "${GREEN}[OK]${NC} Frontend dev server started on :3000"
+
+# Open browser
+sleep 3
+(open "http://localhost:3000" 2>/dev/null || xdg-open "http://localhost:3000" 2>/dev/null || true)
+
+# Wait for all background processes
+wait

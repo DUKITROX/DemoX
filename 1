@@ -1,0 +1,883 @@
+[0;32m=== DemoX Startup ===[0m
+[0;32m[OK][0m .env loaded — all keys present
+[0;32m[OK][0m Virtual environment activated
+[0;32m[OK][0m Python dependencies installed
+[0;32m[OK][0m Playwright browsers ready
+[0;32m[OK][0m Redis ready
+Building frontend...
+
+> demox-frontend@1.0.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.8s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/3) ...
+✓ Generating static pages using 7 workers (3/3) in 269.7ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /demo/[roomId]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[0;32m[OK][0m Frontend built
+
+[0;32m=========================================[0m
+[0;32m  Starting DemoX services...[0m
+[0;32m=========================================[0m
+
+  Backend API:       http://localhost:8000
+  Frontend:          http://localhost:3000
+  Presenter Agent:   LiveKit worker (auto-dispatched)
+
+Press Ctrl+C to stop all services.
+
+[0;32m[OK][0m Backend started on :8000
+[0;32m[OK][0m Presenter agent worker started
+[0;32m[OK][0m Frontend dev server started on :3000
+
+> demox-frontend@1.0.0 dev
+> next dev
+
+INFO:     Started server process [22382]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.20.10.4:3000
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 596ms
+(node:22403) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+INFO:     127.0.0.1:54384 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:livekit:livekit_ffi::server:151:livekit_ffi::server - initializing ffi server v0.12.48
+INFO:livekit:livekit_ffi::cabi:50:livekit_ffi::cabi - initializing ffi server v0.12.48
+DEBUG:asyncio:Using selector: KqueueSelector
+    18:26:57.972 DEBUG… asyncio            Using selector: KqueueSelector  
+DEV:livekit.agents:Watching /Users/danielbordeianu/git/DemoX/presenter_agent
+    18:26:57.974 DEV  … livekit.agents     Watching                             
+                                           /Users/danielbordeianu/git/DemoX/p…  
+INFO:livekit:livekit_ffi::server:151:livekit_ffi::server - initializing ffi server v0.12.48
+INFO:livekit:livekit_ffi::cabi:50:livekit_ffi::cabi - initializing ffi server v0.12.48
+DEBUG:asyncio:Using selector: KqueueSelector
+    18:26:58.887 DEBUG… asyncio            Using selector: KqueueSelector  
+INFO:livekit.agents:starting worker
+    18:26:58.891 INFO … livekit.agents     starting worker  
+                                         {"version": "1.4.2", "rtc-version": 
+"1.1.2"}
+INFO:livekit.agents:HTTP server listening on :54387
+    18:26:58.892 INFO … livekit.agents     HTTP server listening on :54387  
+INFO:livekit.agents:registered worker
+    18:26:59.350 INFO … livekit.agents     registered worker  
+                                         {"agent_name": "", "id": 
+"AW_P69dkzxRzZpM", "url": "wss://demox-wvrqi22d.livekit.cloud", "region": "EU 
+West B", "protocol": 16}
+ GET / 200 in 440ms (compile: 323ms, render: 117ms)
+INFO:     127.0.0.1:54406 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+ GET /demo/demo-dffc0dea 200 in 673ms (compile: 567ms, render: 106ms)
+INFO:     127.0.0.1:54436 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54438 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:livekit.agents:received job request
+INFO:backend.agent_launcher:Launched researcher agent for room demo-b266744a, pid=22515
+INFO:backend.agent_launcher:Presenter agent should join room demo-b266744a automatically (ensure the worker is running: python -m presenter_agent.agent dev)
+    18:27:07.641 INFO … livekit.agents     received job request  
+                                         {"job_id": "AJ_ee2Ec7RaPxpU", 
+"dispatch_id": "AD_zKmM9bpiFF2c", "room": "demo-b266744a", "room_id": 
+"RM_t7ytuJfVueM6", "agent_name": "", "resuming": false, "enable_recording": 
+false}
+INFO:     127.0.0.1:54440 - "POST /api/demo/start HTTP/1.1" 200 OK
+DEBUG:livekit.agents:received assignment
+    18:27:07.702 DEBUG… livekit.agents     received assignment  
+                                         {"agent_name": "", "room_id": 
+"RM_t7ytuJfVueM6", "room": "demo-b266744a", "job_id": "AJ_ee2Ec7RaPxpU", 
+"dispatch_id": "AD_zKmM9bpiFF2c", "enable_recording": false}
+WARNING:livekit.agents:no warmed process available for job, waiting for one to be created
+    18:27:07.704 WARNI… livekit.agents     no warmed process available for      
+                                           job, waiting for one to be created   
+                                         {"job_id": "AJ_ee2Ec7RaPxpU"}
+ GET /demo/demo-b266744a 200 in 48ms (compile: 11ms, render: 38ms)
+INFO:livekit.agents:initializing process
+    18:27:07.723 INFO … livekit.agents     initializing process {"pid": 22517}
+INFO:     127.0.0.1:54456 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54470 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54472 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:livekit.agents:process initialized
+DEBUG:asyncio:Using selector: KqueueSelector
+    18:27:09.741 INFO … livekit.agents     process initialized  
+DEBUG:asyncio:Using selector: KqueueSelector
+                                         {"pid": 22517, "elapsed_time": 2.0}
+    18:27:09.740 DEBUG… asyncio            Using selector: KqueueSelector  
+                                  {"pid": 22517}
+INFO:     127.0.0.1:54498 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:__mp_main__:Presenter agent connected to room: demo-b266744a
+INFO:__mp_main__:Presenter agent connected to room: demo-b266744a
+INFO:__mp_main__:Demo URL: https://monkeytype.com
+    18:27:11.973 INFO … __mp_main__        Presenter agent connected to room:   
+                                           demo-b266744a                        
+                                      {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:__mp_main__:Demo URL: https://monkeytype.com
+    18:27:11.974 INFO … __mp_main__        Demo URL: https://monkeytype.com  
+                                      {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:presenter_agent.screen_share:Starting browser screen share for https://monkeytype.com
+INFO:presenter_agent.screen_share:Starting browser screen share for https://monkeytype.com
+    18:27:11.977 INFO … presente…een_share Starting browser screen share for    
+                                           https://monkeytype.com               
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:     127.0.0.1:54531 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54560 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:presenter_agent.screen_share:Browser navigated to https://monkeytype.com
+INFO:presenter_agent.screen_share:Browser navigated to https://monkeytype.com
+    18:27:14.657 INFO … presente…een_share Browser navigated to                 
+                                           https://monkeytype.com               
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:presenter_agent.screen_share:Screen share track published
+INFO:presenter_agent.screen_share:Screen share track published
+    18:27:14.809 INFO … presente…een_share Screen share track published  
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:configuring session recording
+DEBUG:livekit.agents:configuring session recording
+DEBUG:livekit.agents:input stream attached
+    18:27:14.948 DEBUG… livekit.agents     configuring session recording  
+                                         {"hostname": 
+"demox-wvrqi22d.livekit.cloud", "pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:input stream attached
+    18:27:14.953 DEBUG… livekit.agents     input stream attached  
+                                         {"participant": null, "source": 
+"SOURCE_UNKNOWN", "accepted_sources": ["SOURCE_MICROPHONE"], "pid": 22517, 
+"job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:http_session(): creating a new httpclient ctx
+DEBUG:livekit.agents:http_session(): creating a new httpclient ctx
+    18:27:14.989 DEBUG… livekit.agents     http_session(): creating a new       
+                                           httpclient ctx                       
+                                         {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+DEBUG:livekit.agents:using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+DEBUG:livekit.agents:using audio io: `RoomIO` -> `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+    18:27:14.996 DEBUG… livekit.agents     using audio io: `RoomIO` ->          
+                                           `AgentSession` ->                    
+                                           `TranscriptSynchronizer` ->          
+                                           `RoomIO`                             
+                                         {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:using transcript io: `AgentSession` -> `TranscriptSynchronizer` -> `RoomIO`
+                 DEBUG… livekit.agents     using transcript io: `AgentSession`  
+                                           -> `TranscriptSynchronizer` ->       
+                                           `RoomIO`                             
+                                         {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:     127.0.0.1:54582 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 0.1s
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 0.1s
+    18:27:15.704 WARNI… livekit.agents     failed to synthesize speech: no      
+                                           audio frames were pushed for text:   
+                                           Hello! Welcome! I'm sharing my       
+                                           screen and I'll walk you through     
+                                           this website. I'm still getting      
+                                           some background research ready, but  
+                                           let's start exploring. Feel free to  
+                                           ask me anything along the way!,      
+                                           retrying in 0.1s                     
+                                         {"tts": 
+"livekit.plugins.elevenlabs.tts.TTS", "attempt": 1, "streamed": true, "pid": 
+22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.plugins.deepgram:Established new Deepgram STT WebSocket connection:
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 2.0s
+DEBUG:livekit.plugins.deepgram:Established new Deepgram STT WebSocket connection:
+    18:27:15.896 DEBUG… livekit.….deepgram Established new Deepgram STT         
+                                           WebSocket connection:                
+                                           {"headers": {"dg-project-id": 
+"463968c8-982f-4863-bd78-f870b7579c50", "dg-request-id": 
+"86b42b4f-d8ad-4528-a617-67ee24015f1e", "Date": "Mon, 02 Mar 2026 17:27:15 
+GMT"}, "pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 2.0s
+    18:27:15.902 WARNI… livekit.agents     failed to synthesize speech: no      
+                                           audio frames were pushed for text:   
+                                           Hello! Welcome! I'm sharing my       
+                                           screen and I'll walk you through     
+                                           this website. I'm still getting      
+                                           some background research ready, but  
+                                           let's start exploring. Feel free to  
+                                           ask me anything along the way!,      
+                                           retrying in 2.0s                     
+                                         {"tts": 
+"livekit.plugins.elevenlabs.tts.TTS", "attempt": 2, "streamed": true, "pid": 
+22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:     127.0.0.1:54634 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 2.0s
+WARNING:livekit.agents:failed to synthesize speech: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!, retrying in 2.0s
+    18:27:17.989 WARNI… livekit.agents     failed to synthesize speech: no      
+                                           audio frames were pushed for text:   
+                                           Hello! Welcome! I'm sharing my       
+                                           screen and I'll walk you through     
+                                           this website. I'm still getting      
+                                           some background research ready, but  
+                                           let's start exploring. Feel free to  
+                                           ask me anything along the way!,      
+                                           retrying in 2.0s                     
+                                         {"tts": 
+"livekit.plugins.elevenlabs.tts.TTS", "attempt": 3, "streamed": true, "pid": 
+22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+INFO:     127.0.0.1:54665 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+ERROR:livekit.agents:Error in _tts_inference_task
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 631, in __anext__
+    val = await self._event_aiter.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopAsyncIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/utils/log.py", line 17, in async_fn_logs
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 294, in _tts_inference_task
+    pushed_duration += await _tts_node_inference(input_segment, pushed_duration)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemetry/util/_decorator.py", line 71, in async_wrapper
+    return await func(*args, **kwargs)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 252, in _tts_node_inference
+    async for audio_frame in tts_node:
+    ...<13 lines>...
+        audio_duration += audio_frame.duration
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/agent.py", line 453, in tts_node
+    async for ev in stream:
+        yield ev.frame
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 634, in __anext__
+    raise exc  # noqa: B904
+    ^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 421, in _traceable_main_task
+    await self._main_task()
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 466, in _main_task
+    raise APIError(f"no audio frames were pushed for text: {self._pushed_text}")
+livekit.agents._exceptions.APIError: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!
+ERROR:livekit.agents:Error in _tts_inference_task
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 631, in __anext__
+    val = await self._event_aiter.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopAsyncIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/utils/log.py", line 17, in async_fn_logs
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 294, in _tts_inference_task
+    pushed_duration += await _tts_node_inference(input_segment, pushed_duration)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemetry/util/_decorator.py", line 71, in async_wrapper
+    return await func(*args, **kwargs)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 252, in _tts_node_inference
+    async for audio_frame in tts_node:
+    ...<13 lines>...
+        audio_duration += audio_frame.duration
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/agent.py", line 453, in tts_node
+    async for ev in stream:
+        yield ev.frame
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 634, in __anext__
+    raise exc  # noqa: B904
+    ^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 421, in _traceable_main_task
+    await self._main_task()
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 466, in _main_task
+    raise APIError(f"no audio frames were pushed for text: {self._pushed_text}")
+livekit.agents._exceptions.APIError: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 631, in __anext__
+    val = await self._event_aiter.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopAsyncIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/utils/log.py", line 17, in async_fn_logs
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 294, in _tts_inference_task
+    pushed_duration += await _tts_node_inference(input_segment, pushed_duration)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemetry/util/_decorator.py", line 71, in async_wrapper
+    return await func(*args, **kwargs)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/generation.py", line 252, in _tts_node_inference
+    async for audio_frame in tts_node:
+    ...<13 lines>...
+        audio_duration += audio_frame.duration
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/voice/agent.py", line 453, in tts_node
+    async for ev in stream:
+        yield ev.frame
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 634, in __anext__
+    raise exc  # noqa: B904
+    ^^^^^^^^^
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 421, in _traceable_main_task
+    await self._main_task()
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/tts/tts.py", line 466, in _main_task
+    raise APIError(f"no audio frames were pushed for text: {self._pushed_text}")
+livekit.agents._exceptions.APIError: no audio frames were pushed for text: Hello! Welcome! I'm sharing my screen and I'll walk you through this website. I'm still getting some background research ready, but let's start exploring. Feel free to ask me anything along the way!
+    18:27:20.150 ERROR… livekit.agents     Error in _tts_inference_task         
+                                           Traceback (most recent call last):   
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 631, in __anext__               
+                                               val = await                      
+                                           self._event_aiter.__anext__()        
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^…  
+                                           StopAsyncIteration                   
+                                                                                
+                                           During handling of the above         
+                                           exception, another exception         
+                                           occurred:                            
+                                                                                
+                                           Traceback (most recent call last):   
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 17, in async_fn_logs            
+                                               return await fn(*args,           
+                                           **kwargs)                            
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^…  
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 294, in _tts_inference_task     
+                                               pushed_duration += await         
+                                           _tts_node_inference(input_segment,   
+                                           pushed_duration)                     
+                                                                  ^^^^^^^^^^^…  
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 71, in async_wrapper            
+                                               return await func(*args,         
+                                           **kwargs)  # type: ignore            
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^…  
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 252, in _tts_node_inference     
+                                               async for audio_frame in         
+                                           tts_node:                            
+                                               ...<13 lines>...                 
+                                                   audio_duration +=            
+                                           audio_frame.duration                 
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 453, in tts_node                
+                                               async for ev in stream:          
+                                                   yield ev.frame               
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 634, in __anext__               
+                                               raise exc  # noqa: B904          
+                                               ^^^^^^^^^                        
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 421, in _traceable_main_task    
+                                               await self._main_task()          
+                                             File                               
+                                           "/Users/danielbordeianu/git/DemoX/…  
+                                           line 466, in _main_task              
+                                               raise APIError(f"no audio        
+                                           frames were pushed for text:         
+                                           {self._pushed_text}")                
+                                           livekit.agents._exceptions.APIErro…  
+                                           no audio frames were pushed for      
+                                           text: Hello! Welcome! I'm sharing    
+                                           my screen and I'll walk you through  
+                                           this website. I'm still getting      
+                                           some background research ready, but  
+                                           let's start exploring. Feel free to  
+                                           ask me anything along the way!       
+                                         {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+Traceback (most recent call last):
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/tts/tts.py", line 631, in __anext__
+    val = await self._event_aiter.__anext__()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopAsyncIteration
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/utils/log.py", line 17, in async_fn_logs
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/voice/generation.py", line 294, in _tts_inference_task
+    pushed_duration += await _tts_node_inference(input_segment, pushed_duration)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemet
+ry/util/_decorator.py", line 71, in async_wrapper
+    return await func(*args, **kwargs)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/voice/generation.py", line 252, in _tts_node_inference
+    async for audio_frame in tts_node:
+    ...<13 lines>...
+        audio_duration += audio_frame.duration
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/voice/agent.py", line 453, in tts_node
+    async for ev in stream:
+        yield ev.frame
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/tts/tts.py", line 634, in __anext__
+    raise exc  # noqa: B904
+    ^^^^^^^^^
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/tts/tts.py", line 421, in _traceable_main_task
+    await self._main_task()
+  File 
+"/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/age
+nts/tts/tts.py", line 466, in _main_task
+    raise APIError(f"no audio frames were pushed for text: {self._pushed_text}")
+livekit.agents._exceptions.APIError: no audio frames were pushed for text: 
+Hello! Welcome! I'm sharing my screen and I'll walk you through this website. 
+I'm still getting some background research ready, but let's start exploring. 
+Feel free to ask me anything along the way!
+INFO:     127.0.0.1:54672 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54682 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54685 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54688 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54691 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54694 - "GET /api/demo/demo-b266744a/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54697 - "GET /api/demo/demo-dffc0dea/status HTTP/1.1" 200 OK
+Shutting down...
+INFO:livekit.agents:shutting down worker
+    18:27:30.287 INFO … livekit.agents     shutting down worker  
+                                         {"id": "AW_P69dkzxRzZpM"}
+INFO:     Shutting down
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Target page, context or browser has been closed
+Call log:
+  - taking page screenshot
+  -   - waiting for fonts to load...
+  -   - fonts loaded
+
+WARNING:watchfiles.main:received signal 15, raising KeyboardInterrupt
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Target page, context or browser has been closed
+Call log:
+  - taking page screenshot
+  -   - waiting for fonts to load...
+  -   - fonts loaded
+
+    18:27:30.451 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Target page,        
+                                           context or browser has been closed   
+                                           Call log:                            
+                                             - taking page screenshot           
+                                             -   - waiting for fonts to         
+                                           load...                              
+                                             -   - fonts loaded                 
+                                                                                
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:input stream detached
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+    18:27:30.303 WARNI… watchfiles.main    received signal 15, raising          
+                                           KeyboardInterrupt                    
+INFO:     Finished server process [22382]
+DEBUG:livekit.agents:input stream detached
+WARNING:livekit.agents:exiting forcefully
+    18:27:30.492 WARNI… livekit.agents     exiting forcefully  
+    18:27:30.486 DEBUG… livekit.agents     input stream detached  
+                                         {"participant": "user", "source": 
+"SOURCE_UNKNOWN", "accepted_sources": ["SOURCE_MICROPHONE"], "pid": 22517, 
+"job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Target page, context or browser has been closed
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Target page, context or browser has been closed
+    18:27:30.534 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Target page,        
+                                           context or browser has been closed   
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:30.606 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:30.679 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:30.755 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:30.834 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:30.921 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:30.992 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.069 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+[?25h
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.161 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.227 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.313 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.314 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.387 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.389 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.459 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.530 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.531 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.604 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.676 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.677 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.752 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.753 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.827 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.828 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.899 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:31.969 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:31.970 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:32.040 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:32.111 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:32.241 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.249 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.330 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+                 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+    18:27:32.401 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.402 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.493 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.496 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:session closed
+DEBUG:livekit.agents:session closed
+DEBUG:livekit.agents:shutting down job task
+    18:27:32.509 DEBUG… livekit.agents     session closed  
+INFO:livekit.agents:process exiting
+                                         {"reason": "user_initiated", "error": 
+null, "pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+    18:27:32.513 INFO … livekit.agents     process exiting  
+                                         {"reason": "", "pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:shutting down job task
+    18:27:32.511 DEBUG… livekit.agents     shutting down job task  
+                                         {"reason": "", "user_initiated": false,
+"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+WARNING:asyncio:pipe closed by peer or os.write(pipe, data) raised exception.
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.575 WARNI… asyncio            pipe closed by peer or               
+                                           os.write(pipe, data) raised          
+                                           exception.                           
+                                  {"pid": 22517, "job_id": "AJ_ee2Ec7RaPxpU", 
+"room_id": "RM_t7ytuJfVueM6"}
+ERROR:presenter_agent.screen_share:Screen capture error: Page.screenshot: Connection closed while reading from the driver
+    18:27:32.579 ERROR… presente…een_share Screen capture error:                
+                                           Page.screenshot: Connection closed   
+                                           while reading from the driver        
+                                           {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+DEBUG:livekit.agents:http_session(): closing the httpclient ctx
+DEBUG:livekit.agents:http_session(): closing the httpclient ctx
+    18:27:32.595 DEBUG… livekit.agents     http_session(): closing the          
+                                           httpclient ctx                       
+                                         {"pid": 22517, "job_id": 
+"AJ_ee2Ec7RaPxpU", "room_id": "RM_t7ytuJfVueM6"}
+ERROR:asyncio:Task was destroyed but it is pending!
+task: <Task pending name='job_user_entrypoint' coro=<_JobProc._run_job_task.<locals>._traceable_entrypoint() running at /Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemetry/util/_decorator.py:71> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[_JobProc._run_job_task.<locals>.<lambda>() at /Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/ipc/job_proc_lazy_main.py:324, _JobProc._run_job_task.<locals>._on_entry_done() at /Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/ipc/job_proc_lazy_main.py:326]>
+Exception ignored in: <coroutine object _JobProc._run_job_task.<locals>._traceable_entrypoint at 0x1158bd3f0>
+Traceback (most recent call last):
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/opentelemetry/util/_decorator.py", line 71, in async_wrapper
+    return await func(*args, **kwargs)  # type: ignore
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/livekit/agents/ipc/job_proc_lazy_main.py", line 306, in _traceable_entrypoint
+    await self._job_entrypoint_fnc(job_ctx)
+  File "/Users/danielbordeianu/git/DemoX/presenter_agent/agent.py", line 200, in entrypoint
+    await screen_share.stop()
+  File "/Users/danielbordeianu/git/DemoX/presenter_agent/screen_share.py", line 142, in stop
+    await self._browser.close()
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/playwright/async_api/_generated.py", line 14176, in close
+    return mapping.from_maybe_impl(await self._impl_obj.close(reason=reason))
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/playwright/_impl/_browser.py", line 192, in close
+    raise e
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/playwright/_impl/_browser.py", line 189, in close
+    await self._channel.send("close", {"reason": reason})
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 61, in send
+    return await self._connection.wrap_api_call(
+  File "/Users/danielbordeianu/git/DemoX/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 528, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+RuntimeError: Browser.close: no running event loop
+ERROR:asyncio:Task was destroyed but it is pending!
+task: <Task cancelling name='Task-58' coro=<entrypoint.<locals>.monitor_research() running at /Users/danielbordeianu/git/DemoX/presenter_agent/agent.py:179> wait_for=<Future cancelled>>

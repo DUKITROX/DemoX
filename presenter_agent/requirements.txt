@@ -1,0 +1,10 @@
+livekit-agents==1.4.2
+livekit-plugins-deepgram==1.4.2
+livekit-plugins-anthropic==1.4.2
+livekit-plugins-elevenlabs==1.4.2
+livekit-plugins-silero==1.4.2
+playwright==1.49.1
+pillow==11.1.0
+numpy==2.2.1
+redis[hiredis]==5.2.1
+python-dotenv==1.0.1
