@@ -47,8 +47,8 @@ def _lookup_page_wiki(page_wikis: dict, current_url: str) -> tuple[str, dict] | 
     return None
 
 
-def create_demo_tools(screen_share, room_id: str, redis_url: str = "redis://localhost:6379"):
-    """Create function tools that have access to the screen share and Redis."""
+def create_browser_tools(screen_share, room_id: str, redis_url: str = "redis://localhost:6379"):
+    """Create the 7 browser interaction tools (shared across both modes)."""
 
     async def _build_page_guide(current_url: str) -> tuple[str, bool, int]:
         """Build a page guide string for the given URL (research wiki + live scan).
@@ -270,3 +270,99 @@ def create_demo_tools(screen_share, room_id: str, redis_url: str = "redis://loca
 
     return [get_current_page_guide, click_element, scroll_down, scroll_to_element,
             highlight_element, get_research_context, request_deep_dive]
+
+
+def make_save_learning_tool(mode_manager):
+    """Create the save_learning tool that closes over the ModeManager."""
+    from presenter_agent.mode_state import save_mode_state_to_redis
+
+    @function_tool(
+        description="Save something the boss taught you about how to demo. "
+        "Call this EVERY TIME the boss shares a tip, workflow step, or insight. "
+        "If the boss corrects something, call this again with the same topic to update your notes."
+    )
+    async def save_learning(context: RunContext, topic: str, details: str) -> str:
+        page_url = await mode_manager.screen_share.get_current_url()
+        was_update = mode_manager.state.upsert_learning(topic, details, page_url or "")
+        await save_mode_state_to_redis(
+            mode_manager.state, mode_manager.room_id, mode_manager.redis_url,
+        )
+        count = len(mode_manager.state.learnings)
+        action = "Updated" if was_update else "Noted"
+        log_event(json_logger, "save_learning", f"{action}: {topic}", {
+            "room_id": mode_manager.room_id,
+            "topic": topic,
+            "was_update": was_update,
+            "total_learnings": count,
+        })
+        return f"Got it! {action}: '{topic}'. ({count} learning{'s' if count != 1 else ''} total)"
+
+    return save_learning
+
+
+def make_remove_learning_tool(mode_manager):
+    """Create the remove_learning tool that closes over the ModeManager."""
+    from presenter_agent.mode_state import save_mode_state_to_redis
+
+    @function_tool(
+        description="Remove notes on a topic when the boss says 'forget what I said about X'. "
+        "Pass the topic name to remove."
+    )
+    async def remove_learning(context: RunContext, topic: str) -> str:
+        removed = mode_manager.state.remove_learning(topic)
+        if removed > 0:
+            await save_mode_state_to_redis(
+                mode_manager.state, mode_manager.room_id, mode_manager.redis_url,
+            )
+            remaining = len(mode_manager.state.learnings)
+            log_event(json_logger, "remove_learning", f"Removed: {topic}", {
+                "room_id": mode_manager.room_id,
+                "topic": topic,
+                "removed_count": removed,
+                "remaining": remaining,
+            })
+            return f"Removed notes on '{topic}'. ({remaining} learning{'s' if remaining != 1 else ''} remaining)"
+        return f"No notes found for '{topic}' — nothing to remove."
+
+    return remove_learning
+
+
+def make_switch_to_demo_tool(mode_manager):
+    """Create the switch_to_demo_mode tool that closes over the ModeManager."""
+
+    @function_tool(
+        description="Switch to demo expert mode. Call this when you feel you've learned enough "
+        "from the boss to conduct a demo. Usually after 5+ learnings covering different aspects."
+    )
+    async def switch_to_demo_mode(context: RunContext) -> str:
+        num = len(mode_manager.state.learnings)
+        if num < 2:
+            return (
+                f"You only have {num} learning{'s' if num != 1 else ''}. "
+                "Keep asking the boss questions to learn more before trying a demo!"
+            )
+        result = await mode_manager.switch_to_demo()
+        log_event(json_logger, "mode_switch", "Switched to demo expert mode", {
+            "room_id": mode_manager.room_id,
+            "learnings_count": num,
+        })
+        return result
+
+    return switch_to_demo_mode
+
+
+def make_switch_to_student_tool(mode_manager):
+    """Create the switch_to_student_mode tool that closes over the ModeManager."""
+
+    @function_tool(
+        description="Switch back to student/learning mode. Call this when the user wants to "
+        "teach you more or asks you to stop the demo and go back to learning."
+    )
+    async def switch_to_student_mode(context: RunContext) -> str:
+        result = await mode_manager.switch_to_student()
+        log_event(json_logger, "mode_switch", "Switched back to student mode", {
+            "room_id": mode_manager.room_id,
+        })
+        return result
+
+    return switch_to_student_mode
