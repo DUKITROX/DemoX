@@ -7,7 +7,8 @@ It does NOT ask Claude to invent CSS selectors (those come from live DOM scannin
 
 import json
 import logging
-from anthropic import AsyncAnthropic
+import os
+from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -65,13 +66,13 @@ CRITICAL RULES:
 
 
 async def extract_page_knowledge(
-    client: AsyncAnthropic, url: str, title: str, content: str,
+    client: AsyncOpenAI, url: str, title: str, content: str,
     dom_elements: dict | None = None,
 ) -> dict:
-    """Use Claude to extract semantic knowledge from a single page.
+    """Use Gemini to extract semantic knowledge from a single page.
 
     Args:
-        client: Anthropic API client
+        client: OpenAI-compatible API client (OpenRouter)
         url: Page URL
         title: Page title
         content: Page text content
@@ -98,8 +99,8 @@ async def extract_page_knowledge(
         dom_summary = "\n".join(parts) if parts else "No interactive elements found"
 
     try:
-        response = await client.messages.create(
-            model="claude-sonnet-4-20250514",
+        response = await client.chat.completions.create(
+            model="google/gemini-3.1-flash-lite-preview",
             max_tokens=4000,
             messages=[
                 {
@@ -111,7 +112,7 @@ async def extract_page_knowledge(
                 }
             ],
         )
-        text = response.content[0].text
+        text = response.choices[0].message.content
         # Handle markdown code block wrapping
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]

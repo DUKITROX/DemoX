@@ -2,8 +2,7 @@
 
 import json
 import logging
-from anthropic import AsyncAnthropic
-from anthropic.types import TextBlock
+from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +50,12 @@ Return ONLY valid JSON.
 
 
 async def generate_demo_script(
-    client: AsyncAnthropic, url: str, knowledge: dict
+    client: AsyncOpenAI, url: str, knowledge: dict
 ) -> dict:
     """Generate a structured demo script from website knowledge."""
     try:
-        response = await client.messages.create(
-            model="claude-sonnet-4-20250514",
+        response = await client.chat.completions.create(
+            model="google/gemini-3.1-flash-lite-preview",
             max_tokens=5000,
             messages=[
                 {
@@ -68,9 +67,7 @@ async def generate_demo_script(
                 }
             ],
         )
-        text = next(
-            block.text for block in response.content if isinstance(block, TextBlock)
-        )
+        text = response.choices[0].message.content
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]
         elif "```" in text:

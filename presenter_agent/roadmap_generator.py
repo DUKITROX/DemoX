@@ -1,11 +1,10 @@
-"""Generates a demo roadmap from learnings + research data using Claude Haiku."""
+"""Generates a demo roadmap from learnings + research data using Gemini Flash."""
 
 import json
 import logging
 import os
 
-from anthropic import AsyncAnthropic
-from anthropic.types import TextBlock
+from openai import AsyncOpenAI
 
 from presenter_agent.mode_state import Learning, DemoRoadmap, learnings_to_text
 
@@ -101,15 +100,15 @@ async def generate_roadmap(
     research: dict | None,
     url: str,
 ) -> DemoRoadmap:
-    """Generate a demo roadmap from learnings + research using Claude Haiku."""
-    client = AsyncAnthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    """Generate a demo roadmap from learnings + research using Gemini Flash."""
+    client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=os.environ.get("OPENROUTER_API_KEY", ""))
 
     learnings_text = learnings_to_text(learnings)
     research_text = _format_research(research)
 
     try:
-        response = await client.messages.create(
-            model="claude-haiku-4-5-20241022",
+        response = await client.chat.completions.create(
+            model="google/gemini-3.1-flash-lite-preview",
             max_tokens=4000,
             messages=[
                 {
@@ -122,9 +121,7 @@ async def generate_roadmap(
                 }
             ],
         )
-        text = next(
-            block.text for block in response.content if isinstance(block, TextBlock)
-        )
+        text = response.choices[0].message.content
         # Strip markdown code fences if present
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0]

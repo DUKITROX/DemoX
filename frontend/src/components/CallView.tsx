@@ -12,6 +12,7 @@ import { AgentScreenShare } from "./AgentScreenShare";
 import { UserMicControl } from "./UserMicControl";
 import { AgentStatus } from "./AgentStatus";
 import { Transcript } from "./Transcript";
+import { ScreenShareButton } from "./ScreenShareButton";
 
 interface CallViewProps {
   roomId: string;
@@ -96,9 +97,10 @@ function RoomContent({ roomId }: { roomId: string }) {
         )}
       </div>
 
-      {/* Bottom bar: mic controls */}
+      {/* Bottom bar: mic + screen share controls */}
       <div className="flex items-center justify-center gap-4 p-4 bg-neutral-900 border-t border-neutral-800">
         <UserMicControl />
+        <ScreenShareButton />
       </div>
     </div>
   );

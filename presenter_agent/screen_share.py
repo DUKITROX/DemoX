@@ -161,6 +161,8 @@ class BrowserScreenShare:
         self._capture_task: asyncio.Task | None = None
         self._page_lock = asyncio.Lock()
         self._last_good_frame: rtc.VideoFrame | None = None
+        self._room: rtc.Room | None = None
+        self._published_track: rtc.LocalVideoTrack | None = None
         # Track cursor position so it persists across page navigations
         self._cursor_x: float = VIEWPORT_WIDTH / 2
         self._cursor_y: float = VIEWPORT_HEIGHT / 2
@@ -338,27 +340,91 @@ class BrowserScreenShare:
             """)
         return raw
 
-    async def start(self, room: rtc.Room, url: str):
-        """Launch browser, navigate to URL, and start publishing screen share."""
-        logger.info(f"Starting browser screen share for {url}")
+    async def _attempt_login(self, email: str, password: str) -> None:
+        """Fill and submit a login form. Fails silently if no form is found."""
+        try:
+            # Wait for the email field to be present in the DOM (handles React SPAs)
+            await self._page.wait_for_selector(
+                'input[type="email"], input[type="text"]', timeout=8000
+            )
+
+            # Fill email — prefer type=email, fall back to first visible text input
+            email_field = self._page.locator('input[type="email"]')
+            if not await email_field.count():
+                email_field = self._page.locator('input[type="text"]').first
+            await email_field.fill(email, timeout=5000)
+
+            # Fill password
+            await self._page.locator('input[type="password"]').fill(password, timeout=5000)
+
+            # Click submit — try common labels, fall back to Enter key
+            submitted = False
+            for label in ["Sign In", "Sign in", "Log in", "Login", "Submit"]:
+                btn = self._page.get_by_role("button", name=label, exact=False)
+                if await btn.count():
+                    await btn.first.click()
+                    submitted = True
+                    break
+            if not submitted:
+                await self._page.keyboard.press("Enter")
+
+            await self._page.wait_for_load_state("networkidle", timeout=10000)
+            await self._inject_cursor()
+            logger.info("Auto-login completed successfully")
+        except Exception as e:
+            logger.warning(f"Auto-login attempt failed (continuing anyway): {e}")
+
+    async def start(self, room: rtc.Room, url: str, login_email: str | None = None, login_password: str | None = None):
+        """Launch browser, navigate to URL, and start publishing screen share.
+
+        Convenience method that calls start_browser() + start_publishing().
+        """
+        await self.start_browser(url, login_email=login_email, login_password=login_password)
+        await self.start_publishing(room)
+
+    async def start_browser(self, url: str, login_email: str | None = None, login_password: str | None = None):
+        """Launch Playwright browser and navigate to URL. Does NOT publish video track.
+
+        Use this when the agent needs DOM access (e.g., Student Mode) but shouldn't
+        share its own screen.
+        """
+        logger.info(f"Starting browser for {url}")
 
         # Launch Playwright
         self._playwright = await async_playwright().start()
         self._browser = await self._playwright.chromium.launch(headless=True)
         self._page = await self._browser.new_page(
-            viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT}
+            viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT},
+            device_scale_factor=1,
         )
 
         # Re-inject cursor automatically after any full page load (covers site-initiated navigations)
         self._page.on("load", lambda _: asyncio.ensure_future(self._inject_cursor()))
 
         await self._page.goto(url, wait_until="domcontentloaded", timeout=30000)
-        await self._inject_cursor()
+
+        if login_email and login_password:
+            logger.info("Credentials found — attempting auto-login")
+            await self._attempt_login(login_email, login_password)
+        else:
+            await self._inject_cursor()
+
         logger.info(f"Browser navigated to {url}")
+
+    async def start_publishing(self, room: rtc.Room):
+        """Create video source, publish screen share track, and start capture loop.
+
+        Requires start_browser() to have been called first.
+        """
+        if not self._page:
+            raise RuntimeError("start_browser() must be called before start_publishing()")
+
+        self._room = room
 
         # Create video source and publish as screen share track
         self._source = rtc.VideoSource(VIEWPORT_WIDTH, VIEWPORT_HEIGHT)
         track = rtc.LocalVideoTrack.create_video_track("browser-screen", self._source)
+        self._published_track = track
         options = rtc.TrackPublishOptions(
             source=rtc.TrackSource.SOURCE_SCREENSHARE,
         )
@@ -368,6 +434,27 @@ class BrowserScreenShare:
         # Start capture loop
         self._running = True
         self._capture_task = asyncio.create_task(self._capture_loop())
+
+    async def stop_publishing(self):
+        """Stop capture loop and unpublish screen share track. Keeps browser alive."""
+        self._running = False
+        if self._capture_task:
+            self._capture_task.cancel()
+            try:
+                await self._capture_task
+            except asyncio.CancelledError:
+                pass
+            self._capture_task = None
+
+        if self._room and self._published_track:
+            try:
+                await self._room.local_participant.unpublish_track(self._published_track.sid)
+            except Exception as e:
+                logger.warning(f"Could not unpublish track: {e}")
+            self._published_track = None
+
+        self._source = None
+        logger.info("Screen share publishing stopped (browser still active)")
 
     @staticmethod
     def _decode_frame(screenshot_bytes: bytes) -> rtc.VideoFrame:
@@ -580,10 +667,8 @@ class BrowserScreenShare:
         return ""
 
     async def stop(self):
-        """Clean up browser and stop capture."""
-        self._running = False
-        if self._capture_task:
-            self._capture_task.cancel()
+        """Clean up browser, stop capture, and unpublish track."""
+        await self.stop_publishing()
         try:
             if self._browser:
                 await self._browser.close()

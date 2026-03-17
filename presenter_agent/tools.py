@@ -47,8 +47,8 @@ def _lookup_page_wiki(page_wikis: dict, current_url: str) -> tuple[str, dict] | 
     return None
 
 
-def create_browser_tools(screen_share, room_id: str, redis_url: str = "redis://localhost:6379"):
-    """Create the 7 browser interaction tools (shared across both modes)."""
+def create_browser_tools(screen_share, room_id: str, redis_url: str = "redis://localhost:6379", watcher=None):
+    """Create the browser interaction tools (shared across both modes)."""
 
     async def _build_page_guide(current_url: str) -> tuple[str, bool, int]:
         """Build a page guide string for the given URL (research wiki + live scan).
@@ -268,8 +268,21 @@ def create_browser_tools(screen_share, room_id: str, redis_url: str = "redis://l
         except Exception as e:
             return f"Could not send request: {e}"
 
-    return [get_current_page_guide, click_element, scroll_down, scroll_to_element,
-            highlight_element, get_research_context, request_deep_dive]
+    @function_tool(description="Get the latest analysis of what the instructor is currently showing on their screen share. Returns the detected page and a description of what's visible. Only available during Student Mode when watching the instructor.")
+    async def get_instructor_screen_context(context: RunContext) -> str:
+        if not watcher:
+            return "Instructor screen watcher is not active."
+        if not watcher.is_watching:
+            return "The instructor is not currently sharing their screen."
+        page = watcher.current_page or "unknown"
+        desc = watcher.latest_description or "No analysis available yet."
+        return f"Instructor is currently showing: {page}\nDescription: {desc}"
+
+    tools = [get_current_page_guide, click_element, scroll_down, scroll_to_element,
+             highlight_element, get_research_context, request_deep_dive]
+    if watcher:
+        tools.append(get_instructor_screen_context)
+    return tools
 
 
 def make_save_learning_tool(mode_manager):

@@ -9,7 +9,7 @@ from urllib.parse import urljoin, urlparse
 from dotenv import load_dotenv
 load_dotenv()
 
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 from playwright.async_api import async_playwright
 import redis.asyncio as aioredis
 
@@ -21,7 +21,7 @@ from backend.json_logger import setup_json_logger, log_event
 logger = setup_json_logger("researcher", "researcher.log")
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
+OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 MAX_PAGES = 4
 
 
@@ -181,7 +181,7 @@ async def crawl_pages(browser, start_url: str) -> list[dict]:
 async def research_website(room_id: str, website_url: str):
     """Main research pipeline — crawl, extract, summarize, publish."""
     r = aioredis.from_url(REDIS_URL, decode_responses=True)
-    client = AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+    client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENROUTER_API_KEY)
 
     # Publish initial status
     await r.set(

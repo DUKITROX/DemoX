@@ -7,18 +7,22 @@ from backend.config import LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET
 logger = logging.getLogger(__name__)
 
 
-async def create_room_and_tokens(room_name: str, website_url: str = ""):
+async def create_room_and_tokens(room_name: str, website_url: str = "", room_metadata: dict | None = None):
     """Create a LiveKit room and generate tokens for user and presenter agent."""
+    metadata = {"url": website_url}
+    if room_metadata:
+        metadata.update(room_metadata)
+
     async with LiveKitAPI(
         url=LIVEKIT_URL,
         api_key=LIVEKIT_API_KEY,
         api_secret=LIVEKIT_API_SECRET,
     ) as lk:
-        # Create room with website URL in metadata
+        # Create room with website URL and optional credentials in metadata
         await lk.room.create_room(
             CreateRoomRequest(
                 name=room_name,
-                metadata=json.dumps({"url": website_url}),
+                metadata=json.dumps(metadata),
                 empty_timeout=300,  # 5 min timeout if empty
             )
         )

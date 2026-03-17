@@ -1,12 +1,13 @@
 import asyncio
 import logging
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from backend.config import LIVEKIT_URL
+from backend.config import LIVEKIT_URL, LOGIN_URL, LOGIN_EMAIL, LOGIN_PASSWORD
 from backend.room_manager import create_room_and_tokens, delete_room, ensure_agent_dispatched
 from backend.agent_launcher import launch_presenter, launch_researcher, stop_agents
 from backend.redis_bus import (
@@ -44,10 +45,19 @@ class StartDemoResponse(BaseModel):
 async def start_demo(request: StartDemoRequest):
     room_id = f"demo-{uuid4().hex[:8]}"
 
-    # Create LiveKit room and tokens
-    tokens = await create_room_and_tokens(room_id, request.url)
+    # Attach credentials if the requested hostname matches the configured LOGIN_URL
+    request_host = urlparse(request.url).hostname
+    matched_email = LOGIN_EMAIL if (LOGIN_URL and request_host == LOGIN_URL) else None
+    matched_password = LOGIN_PASSWORD if (LOGIN_URL and request_host == LOGIN_URL) else None
 
-    # Store room metadata
+    # Create LiveKit room and tokens (credentials go into LiveKit room metadata
+    # so the presenter agent can read them via ctx.room.metadata)
+    tokens = await create_room_and_tokens(room_id, request.url, room_metadata={
+        "login_email": matched_email,
+        "login_password": matched_password,
+    })
+
+    # Store room metadata in Redis (for status tracking)
     await set_room_metadata(room_id, {
         "url": request.url,
         "status": "starting",

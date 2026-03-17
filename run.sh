@@ -80,7 +80,7 @@ echo ""
 trap 'echo "Shutting down..."; kill $(jobs -p) 2>/dev/null; exit 0' INT TERM
 
 # Start backend
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload &
 echo -e "${GREEN}[OK]${NC} Backend started on :8000"
 
 # Kill any orphaned presenter agent processes from previous runs
