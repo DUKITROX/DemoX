@@ -1,6 +1,6 @@
 """Instruction builders for the presenter agent's two modes."""
 
-from presenter_agent.mode_state import Learning, DemoRoadmap, RoadmapStep, learnings_to_text
+from presenter_agent.mode_state import Learning, DemoRoadmap, RoadmapStep, StructuredRoadmap, learnings_to_text
 
 
 # Shared navigation and click rules — used by both modes
@@ -31,6 +31,28 @@ NAVIGATION_RULES = """=== CRITICAL NAVIGATION RULES ===
 - You receive a screenshot of your browser before each response. Use it to verify your actions worked.
 - If a click didn't navigate or the page looks wrong, acknowledge it and try again or move on.
 - Reference what you actually see on screen, not what you expected to see."""
+
+
+DEMO_CONTROLLER_RULES = """=== DEMO EXECUTION RULES ===
+- Call execute_step(N) to trigger a browser action, then IMMEDIATELY start narrating about that step.
+- Do NOT wait for browser actions to complete — they execute in the background (0.5-2s).
+- Flow: deliver opening → execute_step(1) + narrate step 1 → execute_step(2) + narrate step 2 → ... → deliver closing → call switch_to_student_mode()
+- Narrate for 5-10 seconds per step — by the time you finish talking, the browser action is done.
+- For user questions: use execute_action("click", "Pricing") to navigate, get_current_page_guide() to see what's on the page.
+- If check_step_status() shows failure: describe the feature verbally and move on to the next step.
+- NEVER read tool names, internal directives, or step numbers aloud.
+  BAD: "Let me execute step 3" / "Let me use highlight_element" / "Let me check the status"
+  GOOD: "Let me show you the pricing options" / "Notice this section here" / "Check out these features"
+- When all steps are done, deliver your closing line and call switch_to_student_mode().
+
+=== HOW TO CLICK ELEMENTS ===
+- For roadmap steps, use execute_step(N) — navigation is built into the step.
+- For ad-hoc navigation, use execute_action("click", "Pricing") with the element's VISIBLE TEXT.
+- Use get_current_page_guide() to see what's clickable on the current page.
+
+=== VISUAL AWARENESS ===
+- You receive a screenshot of your browser before each response. Use it to verify actions worked.
+- If something looks wrong, acknowledge it briefly and move on — don't get stuck."""
 
 
 def _research_summary(research: dict | None) -> tuple[str, str, list[str], bool]:
@@ -132,47 +154,79 @@ Current learnings: {num_learnings}
 """
 
 
+def _format_roadmap_steps(roadmap: StructuredRoadmap) -> str:
+    """Format roadmap steps as a numbered list for agent instructions."""
+    lines = []
+    for i, step in enumerate(roadmap.steps, 1):
+        nav = ""
+        if step.navigation_action:
+            nav = f" [action: {step.navigation_action}]"
+        lines.append(f"  Step {i}: {step.title}{nav}")
+        # Include key narration points from instructions (first 2 lines)
+        for line in step.instructions.strip().split("\n")[:2]:
+            stripped = line.strip()
+            if stripped:
+                lines.append(f"    - {stripped}")
+    return "\n".join(lines)
+
+
 def build_demo_expert_instructions(
     url: str,
     research: dict | None,
-    roadmap: DemoRoadmap | None,
+    roadmap: DemoRoadmap | StructuredRoadmap | None,
 ) -> str:
     """Build instructions for Demo Expert Mode.
 
-    The agent conducts a structured demo by following the roadmap markdown inline.
-    NOTE: This is now only used as a fallback. The TaskGroup-based flow uses
-    build_step_instructions() for each step instead.
+    Accepts either a StructuredRoadmap (new BrowserController flow) or
+    a DemoRoadmap (legacy fallback). The agent uses fire-and-forget
+    execute_step(N) tools to trigger browser actions while narrating.
     """
     product_name, features_summary, available_pages, research_ready = _research_summary(research)
 
-    roadmap_content = roadmap.markdown_content if roadmap else "No roadmap available. Improvise a brief walkthrough."
+    # Format roadmap content based on type
+    if isinstance(roadmap, StructuredRoadmap):
+        opening = roadmap.opening_line
+        closing = roadmap.closing_line
+        steps_text = _format_roadmap_steps(roadmap)
+        roadmap_content = f"""Opening: "{opening}"
+
+Steps:
+{steps_text}
+
+Closing: "{closing}"
+"""
+    elif isinstance(roadmap, DemoRoadmap):
+        roadmap_content = roadmap.markdown_content
+        opening = ""
+        closing = ""
+    else:
+        roadmap_content = "No roadmap available. Improvise a brief walkthrough."
+        opening = ""
+        closing = ""
 
     return f"""You are an expert product demo specialist conducting a live demo of {product_name}: {url}
 You are sharing your screen. The user sees everything you do.
 
 === EXECUTION MODE ===
-Your demo script below is your primary directive. Execute it step by step:
-- Follow numbered sub-steps within each Step section sequentially
-- Call the exact tools specified with the exact arguments shown
-- Speak each "Say:" line naturally — paraphrase slightly but keep key points
-- If a tool call fails, follow the "If not found:" fallback inline
-- KEEP GOING. Do not pause between steps. Execute one, narrate, move to next.
-- Call get_current_page_guide() after every page navigation to verify it worked
+You have a demo script with numbered steps. For each step:
+1. Call execute_step(N) to trigger the browser action in the background
+2. Immediately start narrating about that step — don't wait for the action to complete
+3. When done narrating, move to the next step
+
+{DEMO_CONTROLLER_RULES}
 
 === DEVIATIONS ===
 You CAN deviate from the script when:
-- The user asks a question → pause, answer fully, then say "Let me continue showing you..." and resume from where you left off in the script
-- The user asks to see something specific → navigate there, show it, then return to the script ("Now, back to what I was showing you...")
-- Something unexpected happens (page didn't load, element missing) → acknowledge it, describe what you wanted to show verbally, and continue
+- The user asks a question → pause, answer fully, then say "Let me continue showing you..." and resume
+- The user asks to see something specific → use execute_action("click", "visible text") to navigate, then return to script
+- Something unexpected happens → acknowledge briefly, describe verbally, continue
 
-You ALWAYS return to the script after a deviation. The script is your home base.
+You ALWAYS return to the script after a deviation.
 
 === HANDLING REQUESTS TO GO BACK TO LEARNING ===
-If the user says something like "go back to learning", "let me teach you more", "you need more practice", or "stop the demo":
+If the user says "go back to learning", "let me teach you more", "stop the demo":
 1. First ask: "Before we switch back, how did I do? Any areas I should focus on?"
 2. Then call switch_to_student_mode()
-
-{NAVIGATION_RULES}
 
 === PRODUCT OVERVIEW ===
 {features_summary if features_summary else "(Research data available via get_research_context)"}

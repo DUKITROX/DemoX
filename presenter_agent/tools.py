@@ -4,15 +4,18 @@ import asyncio
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlparse
+from uuid import uuid4
 from livekit.agents import function_tool, RunContext
 import redis.asyncio as aioredis
 from openai import AsyncOpenAI
 
 from backend.config import OPENROUTER_API_KEY, LLM_MODEL, OPENROUTER_BASE_URL
 from backend.json_logger import setup_json_logger, log_event
+from presenter_agent.browser_controller import BrowserController, BrowserTicket
 
 json_logger = setup_json_logger("presenter.tools", "presenter.log")
 
@@ -529,6 +532,115 @@ def create_student_tools(room_id: str, redis_url: str = "redis://localhost:6379"
     return [get_research_context, request_deep_dive]
 
 
+def _parse_navigation_action(nav_action: str | None) -> tuple[str, str]:
+    """Parse navigation_action like 'click_element("Pricing")' into (action, target_text)."""
+    if not nav_action:
+        return "highlight", ""
+    m = re.search(r'click_element\(["\'](.+?)["\']\)', nav_action)
+    if m:
+        return "click", m.group(1)
+    m = re.search(r'scroll_to_element\(["\'](.+?)["\']\)', nav_action)
+    if m:
+        return "scroll_to", m.group(1)
+    return "click", nav_action.strip()
+
+
+def create_demo_controller_tools(
+    controller: BrowserController,
+    roadmap,
+    screen_share,
+    room_id: str,
+    redis_url: str = "redis://localhost:6379",
+):
+    """Create fire-and-forget demo tools backed by a BrowserController.
+
+    Returns tools: execute_step, execute_action, check_step_status,
+    get_current_page_guide, get_research_context, request_deep_dive.
+    """
+
+    @function_tool(
+        description="Execute a roadmap step by number. The browser action happens in the background — "
+        "return immediately and keep narrating. Pass the step number (1-based)."
+    )
+    async def execute_step(context: RunContext, step_number: int) -> str:
+        steps = roadmap.steps
+        if step_number < 1 or step_number > len(steps):
+            return f"Invalid step number {step_number}. Valid range: 1-{len(steps)}."
+
+        step = steps[step_number - 1]
+        action, target_text = _parse_navigation_action(step.navigation_action)
+
+        ticket = BrowserTicket(
+            ticket_id=f"step_{step_number}",
+            action=action,
+            target_text=target_text or None,
+            step_number=step_number,
+        )
+        controller.submit(ticket)
+
+        action_desc = f"{action} '{target_text}'" if target_text else action
+        log_event(json_logger, "execute_step", f"Step {step_number}: {action_desc}", {
+            "room_id": room_id,
+            "step_number": step_number,
+            "action": action,
+            "target_text": target_text,
+        })
+        return (
+            f"Step {step_number} queued: {action_desc}. "
+            f"Continue narrating about: {step.title}"
+        )
+
+    @function_tool(
+        description="Execute an ad-hoc browser action (for Q&A or off-script navigation). "
+        "Actions: 'click', 'scroll', 'scroll_to', 'highlight', 'hover'. "
+        "Pass target_text for the element's visible text. Pass pixels for scroll amount."
+    )
+    async def execute_action(
+        context: RunContext,
+        action: str,
+        target_text: str = "",
+        pixels: int = 400,
+    ) -> str:
+        ticket = BrowserTicket(
+            ticket_id=f"adhoc_{uuid4().hex[:8]}",
+            action=action,
+            target_text=target_text or None,
+            pixels=pixels,
+        )
+        controller.submit(ticket)
+
+        action_desc = f"{action} '{target_text}'" if target_text else f"{action} {pixels}px"
+        log_event(json_logger, "execute_action", f"Ad-hoc: {action_desc}", {
+            "room_id": room_id,
+            "action": action,
+            "target_text": target_text,
+        })
+        return f"Executing {action_desc} in background. Keep talking."
+
+    @function_tool(
+        description="Check whether a submitted browser action has completed. "
+        "Pass the ticket_id (e.g. 'step_3'). Only needed when you must confirm "
+        "a page loaded before discussing its content."
+    )
+    async def check_step_status(context: RunContext, ticket_id: str) -> str:
+        result = controller.get_result(ticket_id)
+        if result is None:
+            return f"'{ticket_id}' is still executing."
+        if result.success:
+            msg = f"'{ticket_id}' succeeded: {result.message}"
+            if result.page_changed:
+                msg += f" (now on {result.new_url})"
+            return msg
+        return f"'{ticket_id}' failed: {result.message}. Describe the feature verbally and move on."
+
+    # Reuse readonly tools from browser tools factory
+    browser_tools = create_browser_tools(screen_share, room_id, redis_url)
+    READONLY_NAMES = {"get_current_page_guide", "get_research_context", "request_deep_dive"}
+    readonly_tools = [t for t in browser_tools if t.info.name in READONLY_NAMES]
+
+    return [execute_step, execute_action, check_step_status, *readonly_tools]
+
+
 def make_save_learning_tool(mode_manager):
     """Create the save_learning tool that closes over the ModeManager."""
     from presenter_agent.mode_state import save_mode_state_to_redis
@@ -628,13 +740,11 @@ def make_remove_learning_tool(mode_manager):
 def make_switch_to_demo_tool(mode_manager):
     """Create the switch_to_demo_mode tool that closes over the ModeManager.
 
-    This tool:
-    1. Starts Playwright and generates a structured roadmap (via mode_manager.prepare_demo)
-    2. Creates a TaskGroup from the roadmap steps
-    3. Awaits the TaskGroup — each step executes one at a time
-    4. After completion or abort, switches back to student mode
+    Starts Playwright, generates a roadmap, starts the BrowserController,
+    and switches agent instructions/tools to fire-and-forget demo mode.
+    The agent narrates continuously and calls execute_step(N) to trigger
+    browser actions in the background.
     """
-    from presenter_agent.demo_task import create_demo_task_group
 
     @function_tool(
         description="Switch to demo expert mode and start a live screen-shared demo. "
@@ -649,65 +759,12 @@ def make_switch_to_demo_tool(mode_manager):
                 "Keep asking the boss questions to learn more before trying a demo!"
             )
 
-        # 1. Prepare: start Playwright, generate roadmap, navigate home, start publishing
-        roadmap = await mode_manager.prepare_demo()
-        if roadmap is None:
-            return "Could not prepare the demo — browser or roadmap generation failed."
-
-        log_event(json_logger, "mode_switch", "Starting demo with TaskGroup", {
+        log_event(json_logger, "mode_switch", "Starting demo with BrowserController", {
             "room_id": mode_manager.room_id,
             "learnings_count": num,
-            "roadmap_steps": len(roadmap.steps),
         })
 
-        # 2. Create reduced tool set for TaskGroup steps (no page guide/research)
-        browser_tools = mode_manager.get_demo_step_tools()
-
-        # 3. Create and run TaskGroup
-        # Get chat_ctx from the current agent
-        chat_ctx = mode_manager.agent.chat_ctx if mode_manager.agent else None
-
-        task_group = create_demo_task_group(
-            roadmap=roadmap,
-            browser_tools=browser_tools,
-            screen_share=mode_manager.screen_share,
-            url=mode_manager.url,
-            chat_ctx=chat_ctx,
-            room_id=mode_manager.room_id,
-            redis_url=mode_manager.redis_url,
-        )
-
-        # Store reference so manual mode switch can cancel it
-        mode_manager.active_task_group = task_group
-
-        try:
-            # 4. Await the TaskGroup — blocks until all steps complete or aborted
-            results = await task_group
-
-            # 5. Check if any step was aborted
-            aborted = False
-            if results and hasattr(results, 'task_results'):
-                for task_id, result in results.task_results.items():
-                    if result is False:
-                        aborted = True
-                        break
-
-            log_event(json_logger, "demo_complete",
-                      f"Demo {'aborted' if aborted else 'completed'}", {
-                          "room_id": mode_manager.room_id,
-                          "aborted": aborted,
-                      })
-
-        except Exception as e:
-            log_event(json_logger, "demo_error", f"TaskGroup error: {e}", {
-                "room_id": mode_manager.room_id,
-                "error": str(e),
-            })
-        finally:
-            mode_manager.active_task_group = None
-
-        # 6. Switch back to student mode after demo ends
-        result = await mode_manager.switch_to_student()
+        result = await mode_manager.switch_to_demo()
         return result
 
     return switch_to_demo_mode

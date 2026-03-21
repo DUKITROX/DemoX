@@ -32,11 +32,11 @@ from livekit.agents import (
     cli,
 )
 from livekit.agents.voice.agent_session import SessionConnectOptions
-from livekit.plugins import deepgram, silero, openai as livekit_openai
+from livekit.plugins import anthropic as livekit_anthropic, deepgram, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 import redis.asyncio as aioredis
 
-from backend.config import LLM_MODEL, FAST_DEMO
+from backend.config import FAST_DEMO
 from presenter_agent.screen_share import BrowserScreenShare
 from presenter_agent.instructor_capture import InstructorScreenCapture
 from presenter_agent.visual_agent import VisualAgent
@@ -110,8 +110,7 @@ async def entrypoint(ctx: JobContext):
     if is_console:
         # Console mode: text-only chat with instructions but no browser/Redis/tools
         instructions = build_student_instructions(url, None, [])
-        console_llm = livekit_openai.LLM.with_openrouter(model=LLM_MODEL)
-        console_llm._strict_tool_schema = False
+        console_llm = livekit_anthropic.LLM(model="claude-haiku-4-5-20251001")
         agent = Agent(
             instructions=instructions,
             llm=console_llm,
@@ -171,11 +170,9 @@ async def entrypoint(ctx: JobContext):
 
     # Create session with pipeline components — tasks inherit these via session fallback
     # Use reduced LLM retry/timeout to prevent cascading failures:
-    # Default (max_retry=3, timeout=10s) = ~44s worst case, which causes LiveKit ping timeouts.
-    # With max_retry=1, timeout=20s = ~40s worst case, keeps LiveKit alive while giving
-    # Haiku via OpenRouter enough headroom for vision (screenshot) payloads.
-    session_llm = livekit_openai.LLM.with_openrouter(model=LLM_MODEL)
-    session_llm._strict_tool_schema = False
+    # max_retry=1, timeout=12s = 24s worst case, safely under LiveKit's ~30s ping timeout.
+    # Direct Anthropic API (no OpenRouter hop) keeps vision latency low.
+    session_llm = livekit_anthropic.LLM(model="claude-haiku-4-5-20251001")
     session = AgentSession(
         vad=ctx.proc.userdata["vad"],
         stt=deepgram.STT(model="nova-3", language="en"),
@@ -184,7 +181,7 @@ async def entrypoint(ctx: JobContext):
         turn_detection=MultilingualModel(),
         max_tool_steps=5,  # allow highlight + scroll + highlight + move_mouse + step_complete in one response
         conn_options=SessionConnectOptions(
-            llm_conn_options=APIConnectOptions(max_retry=1, timeout=20.0),
+            llm_conn_options=APIConnectOptions(max_retry=1, timeout=12.0),
         ),
     )
     await session.start(
@@ -373,6 +370,11 @@ async def entrypoint(ctx: JobContext):
                     try:
                         event = json.loads(message["data"])
                         event_type = event.get("type")
+
+                        # Only process navigation and click events to reduce event loop pressure.
+                        # scroll/mouseenter/mouseleave/input are high-volume and not critical.
+                        if event_type not in ("navigation", "click"):
+                            continue
 
                         # Track visit timeline on navigation events
                         if event_type == "navigation":

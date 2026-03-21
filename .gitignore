@@ -9,6 +9,7 @@ __pycache__/
 .vite/
 node_modules/
 auth_state.json
+.chrome_profile/
 *.png
 *.jpg
 .next/

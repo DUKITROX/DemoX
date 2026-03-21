@@ -3,12 +3,15 @@
 import asyncio
 import io
 import logging
+import os
 import re
 
 import numpy as np
 from PIL import Image
-from playwright.async_api import async_playwright, Page, Browser, Locator
+from playwright.async_api import async_playwright, Page, Browser, BrowserContext, Locator
 from livekit import rtc
+
+AUTH_STATE_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "auth_state.json")
 
 logger = logging.getLogger(__name__)
 
@@ -392,11 +395,18 @@ class BrowserScreenShare:
 
         # Launch Playwright
         self._playwright = await async_playwright().start()
-        self._browser = await self._playwright.chromium.launch(headless=True)
-        self._page = await self._browser.new_page(
+        self._browser = await self._playwright.chromium.launch(headless=True, channel="chrome")
+
+        # Load saved auth state (cookies/localStorage) if available
+        storage = AUTH_STATE_FILE if os.path.exists(AUTH_STATE_FILE) else None
+        if storage:
+            logger.info(f"Loading saved auth state from {AUTH_STATE_FILE}")
+        self._context: BrowserContext = await self._browser.new_context(
             viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT},
             device_scale_factor=1,
+            storage_state=storage,
         )
+        self._page = await self._context.new_page()
 
         # Re-inject cursor automatically after any full page load (covers site-initiated navigations)
         self._page.on("load", lambda _: asyncio.ensure_future(self._inject_cursor()))

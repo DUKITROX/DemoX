@@ -19,12 +19,14 @@ from presenter_agent.instructions import (
 from presenter_agent.roadmap_generator import generate_roadmap
 from presenter_agent.tools import (
     create_browser_tools,
+    create_demo_controller_tools,
     create_student_tools,
     make_save_learning_tool,
     make_remove_learning_tool,
     make_switch_to_demo_tool,
     make_switch_to_student_tool,
 )
+from presenter_agent.browser_controller import BrowserController
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +58,12 @@ class ModeManager:
         # Browser tools created on-demand when Playwright starts
         self._browser_tools: list | None = None
 
-        # Active TaskGroup reference — set during demo, used for cancellation
+        # Active TaskGroup reference — kept for backward compat (agent.py checks it)
         self.active_task_group = None
+
+        # BrowserController for fire-and-forget demo actions
+        self._controller: BrowserController | None = None
+        self._structured_roadmap: StructuredRoadmap | None = None
 
         # Silence detector state
         self._silence_task: asyncio.Task | None = None
@@ -94,12 +100,22 @@ class ModeManager:
         ]
 
     def get_demo_expert_tools(self) -> list:
-        """Return tools for Demo Expert Mode: browser tools + switch to student.
+        """Return tools for Demo Expert Mode.
 
-        Browser tools are created on-demand (Playwright must be started first).
-        NOTE: This is kept for backward compat / manual mode switch. The TaskGroup
-        flow uses get_demo_browser_tools() instead (no switch tool — tasks handle it).
+        When BrowserController is active, returns fire-and-forget controller tools.
+        Falls back to direct browser tools if controller not ready.
         """
+        if self._controller and self._structured_roadmap:
+            controller_tools = create_demo_controller_tools(
+                self._controller,
+                self._structured_roadmap,
+                self.screen_share,
+                self.room_id,
+                self.redis_url,
+            )
+            return [*controller_tools, make_switch_to_student_tool(self)]
+
+        # Fallback: direct browser tools
         if self._browser_tools is None:
             self._browser_tools = create_browser_tools(
                 self.screen_share, self.room_id, self.redis_url,
@@ -195,27 +211,27 @@ class ModeManager:
         return roadmap
 
     async def switch_to_demo(self) -> str:
-        """Switch from Student to Demo Expert mode (legacy path for manual mode switch).
+        """Switch from Student to Demo Expert mode.
 
-        For the normal flow, use prepare_demo() + TaskGroup instead.
-        This is kept for manual mode switch via API/extension.
+        Starts Playwright, generates roadmap, starts BrowserController,
+        updates agent with fire-and-forget tools and continuous narration instructions.
         """
         roadmap = await self.prepare_demo()
         if roadmap is None:
             return "Could not start browser for demo."
 
-        # For manual switch, use the old approach with full instructions
-        from presenter_agent.mode_state import DemoRoadmap
-        from presenter_agent.roadmap_generator import _roadmap_to_readable
+        # Store structured roadmap for controller tools
+        self._structured_roadmap = roadmap
 
-        # Create a legacy DemoRoadmap for build_demo_expert_instructions
-        markdown = _roadmap_to_readable(roadmap)
-        legacy_roadmap = DemoRoadmap(markdown_content=markdown, file_path=roadmap.file_path)
-        self.state.roadmap = legacy_roadmap
+        # Start the BrowserController
+        self._controller = BrowserController(self.screen_share)
+        self._controller.start()
+        logger.info(f"BrowserController started for room {self.room_id}")
 
+        # Build instructions with StructuredRoadmap (uses DEMO_CONTROLLER_RULES)
         research = await self._get_research()
         new_instructions = build_demo_expert_instructions(
-            self.url, research, legacy_roadmap,
+            self.url, research, roadmap,
         )
         new_tools = self.get_demo_expert_tools()
 
@@ -230,9 +246,9 @@ class ModeManager:
             self.session.generate_reply(
                 instructions=(
                     "You just switched to demo expert mode. Your screen is now shared. "
-                    "Start from the top of your demo script — say your Opening, call "
-                    "get_current_page_guide, and begin executing step by step. "
-                    "Keep going without stopping."
+                    "Start with your opening line, then call execute_step(1) and begin narrating. "
+                    "Keep going through all steps without stopping. "
+                    "Browser actions happen in the background — just keep talking."
                 ),
             )
             self.start_silence_detector()
@@ -242,12 +258,19 @@ class ModeManager:
     async def switch_to_student(self) -> str:
         """Switch from Demo Expert back to Student mode.
 
-        Stops publishing, closes Playwright browser, resumes instructor screen capture.
+        Stops BrowserController, publishing, closes Playwright browser.
         Updates instructions and tools. Sets feedback flag.
         Returns a prompt string for the tool response.
         """
-        # 0. Stop silence detector and cancel any active TaskGroup
+        # 0. Stop silence detector, controller, and cancel any active TaskGroup
         self.stop_silence_detector()
+
+        if self._controller:
+            await self._controller.stop()
+            self._controller = None
+            self._structured_roadmap = None
+            logger.info(f"BrowserController stopped for room {self.room_id}")
+
         if self.active_task_group and not self.active_task_group.done():
             self.active_task_group.cancel()
             self.active_task_group = None
@@ -290,8 +313,10 @@ class ModeManager:
                 self.url, research, self.state.learnings,
             )
         else:
+            # Prefer StructuredRoadmap (controller flow) over legacy DemoRoadmap
+            roadmap = self._structured_roadmap or self.state.roadmap
             return build_demo_expert_instructions(
-                self.url, research, self.state.roadmap,
+                self.url, research, roadmap,
             )
 
     # ── Silence Detector ──────────────────────────────────────────────
@@ -379,9 +404,9 @@ class ModeManager:
         retry_instructions = (
             f"You went silent for a bit. {screenshot_context}"
             "Look at your screenshot and your demo script. "
-            "Continue from where you left off — call get_current_page_guide to see "
-            "what's on the page, then keep executing your demo script. "
-            "If you've finished all steps, say your closing line and ask if there are questions."
+            "Continue from where you left off — call the next execute_step(N) "
+            "and keep narrating. If you've finished all steps, say your closing line "
+            "and call switch_to_student_mode()."
         )
 
         self.session.generate_reply(instructions=retry_instructions)
