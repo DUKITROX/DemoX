@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Head from "next/head";
 import { CallView } from "@/components/CallView";
 
 export default function DemoRoom() {
@@ -10,6 +11,18 @@ export default function DemoRoom() {
   const [token, setToken] = useState<string | null>(null);
   const [livekitUrl, setLivekitUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  // Inject meta tag for Chrome extension auto-detection
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="demox-room-id"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "demox-room-id");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", roomId);
+    return () => { meta?.remove(); };
+  }, [roomId]);
 
   useEffect(() => {
     const storedToken = sessionStorage.getItem(`token:${roomId}`);

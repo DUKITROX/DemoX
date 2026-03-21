@@ -7,7 +7,6 @@ It does NOT ask Claude to invent CSS selectors (those come from live DOM scannin
 
 import json
 import logging
-import os
 from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
@@ -69,10 +68,10 @@ async def extract_page_knowledge(
     client: AsyncOpenAI, url: str, title: str, content: str,
     dom_elements: dict | None = None,
 ) -> dict:
-    """Use Gemini to extract semantic knowledge from a single page.
+    """Extract semantic knowledge from a single page via OpenRouter.
 
     Args:
-        client: OpenAI-compatible API client (OpenRouter)
+        client: OpenAI-compatible API client (pointed at OpenRouter)
         url: Page URL
         title: Page title
         content: Page text content
@@ -99,8 +98,9 @@ async def extract_page_knowledge(
         dom_summary = "\n".join(parts) if parts else "No interactive elements found"
 
     try:
+        from backend.config import LLM_MODEL
         response = await client.chat.completions.create(
-            model="google/gemini-3.1-flash-lite-preview",
+            model=LLM_MODEL,
             max_tokens=4000,
             messages=[
                 {

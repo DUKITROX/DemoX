@@ -15,7 +15,9 @@ from backend.redis_bus import (
     get_room_metadata,
     get_research,
     cleanup_room,
+    publish_mode_command,
 )
+from backend.events import store_events, get_events, get_event_count, cleanup_events
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -99,11 +101,18 @@ async def get_demo_status(room_id: str):
         raise HTTPException(status_code=404, detail="Room not found")
 
     research = await get_research(room_id)
+
+    # Fetch current mode from mode_state
+    from presenter_agent.mode_state import load_mode_state_from_redis
+    from backend.config import REDIS_URL
+    mode_state = await load_mode_state_from_redis(room_id, REDIS_URL)
+
     return {
         "room_id": room_id,
         "url": room.get("url"),
         "status": room.get("status"),
         "research_ready": research is not None and research.get("status") == "complete",
+        "mode": mode_state.mode if mode_state else "student",
     }
 
 
@@ -111,11 +120,62 @@ async def get_demo_status(room_id: str):
 async def stop_demo(room_id: str):
     stop_agents(room_id)
     await cleanup_room(room_id)
+    await cleanup_events(room_id)
     try:
         await delete_room(room_id)
     except Exception as e:
         logger.warning(f"Failed to delete LiveKit room {room_id}: {e}")
     return {"status": "stopped"}
+
+
+# ── Extension Event Endpoints ──────────────────────────────────────────
+
+
+class PostEventsRequest(BaseModel):
+    events: list[dict]
+
+
+@app.post("/api/demo/{room_id}/events")
+async def post_events(room_id: str, request: PostEventsRequest):
+    """Receive instructor browsing events from the Chrome extension."""
+    room = await get_room_metadata(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    count = await store_events(room_id, request.events)
+    logger.info(f"Received {count} events for room {room_id}")
+    return {"stored": count}
+
+
+@app.get("/api/demo/{room_id}/events")
+async def get_demo_events(room_id: str, since: float = 0, limit: int = 1000):
+    """Retrieve stored instructor events for a room."""
+    room = await get_room_metadata(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    events = await get_events(room_id, since=since, limit=limit)
+    total = await get_event_count(room_id)
+    return {"events": events, "total": total}
+
+
+class ModeSwitchRequest(BaseModel):
+    mode: str  # "student" or "demo_expert"
+
+
+@app.post("/api/demo/{room_id}/mode")
+async def switch_mode(room_id: str, request: ModeSwitchRequest):
+    """Manual mode switch from the Chrome extension popup."""
+    if request.mode not in ("student", "demo_expert"):
+        raise HTTPException(status_code=400, detail="Invalid mode. Use 'student' or 'demo_expert'.")
+
+    room = await get_room_metadata(room_id)
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    await publish_mode_command(room_id, request.mode)
+    logger.info(f"Mode switch command published for room {room_id}: {request.mode}")
+    return {"status": "ok", "mode": request.mode}
 
 
 @app.get("/health")

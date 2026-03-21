@@ -54,8 +54,9 @@ async def generate_demo_script(
 ) -> dict:
     """Generate a structured demo script from website knowledge."""
     try:
+        from backend.config import LLM_MODEL
         response = await client.chat.completions.create(
-            model="google/gemini-3.1-flash-lite-preview",
+            model=LLM_MODEL,
             max_tokens=5000,
             messages=[
                 {

@@ -9,7 +9,14 @@ import {
 import { Track } from "livekit-client";
 import { useEffect, useRef } from "react";
 
-export function Transcript() {
+interface ChatMessage {
+  id: string;
+  text: string;
+  timestamp: number;
+  speaker: "You";
+}
+
+export function Transcript({ chatMessages = [] }: { chatMessages?: ChatMessage[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const localParticipant = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants();
@@ -26,14 +33,20 @@ export function Transcript() {
   const agentTranscription = useTrackTranscription(agentTrack);
   const userTranscription = useTrackTranscription(userTrack);
 
-  // Combine and sort segments
+  // Combine voice segments and chat messages, sort by time
   const allSegments = [
     ...agentTranscription.segments.map((s) => ({ ...s, speaker: "Agent" })),
     ...userTranscription.segments.map((s) => ({ ...s, speaker: "You" })),
+    ...chatMessages.map((m) => ({
+      id: m.id,
+      text: m.text,
+      speaker: "You (text)",
+      firstReceivedTime: m.timestamp,
+    })),
   ].sort((a, b) => a.firstReceivedTime - b.firstReceivedTime);
 
-  // Keep only last 10 segments
-  const recentSegments = allSegments.slice(-10);
+  // Keep only last 15 segments
+  const recentSegments = allSegments.slice(-15);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -57,6 +70,8 @@ export function Transcript() {
             className={
               segment.speaker === "Agent"
                 ? "text-[var(--accent)] font-medium"
+                : segment.speaker === "You (text)"
+                ? "text-green-400 font-medium"
                 : "text-blue-400 font-medium"
             }
           >

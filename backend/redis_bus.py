@@ -54,10 +54,18 @@ async def get_room_metadata(room_id: str) -> dict | None:
     return None
 
 
+async def publish_mode_command(room_id: str, mode: str):
+    """Publish a mode switch command from the extension/API to the agent."""
+    r = await get_redis()
+    await r.publish(f"mode_commands:{room_id}", json.dumps({"mode": mode}))
+
+
 async def cleanup_room(room_id: str):
     """Remove all Redis keys for a room."""
     r = await get_redis()
     await r.delete(
         f"research:{room_id}",
         f"room:{room_id}",
+        f"instructor_events:{room_id}",
+        f"mode_state:{room_id}",
     )

@@ -477,6 +477,9 @@ class BrowserScreenShare:
         while self._running:
             frame_start = loop.time()
             try:
+                if not self._page or self._page.is_closed():
+                    logger.info("Page closed — stopping capture loop")
+                    break
                 async with self._page_lock:
                     screenshot_bytes = await self._page.screenshot(type="jpeg", quality=65)
                 frame = await loop.run_in_executor(
@@ -485,8 +488,12 @@ class BrowserScreenShare:
                 self._source.capture_frame(frame)
                 self._last_good_frame = frame
             except Exception as e:
+                err_msg = str(e)
+                if "has been closed" in err_msg or "Target closed" in err_msg:
+                    logger.info(f"Browser closed — stopping capture loop")
+                    break
                 logger.error(f"Screen capture error: {e}")
-                if self._last_good_frame is not None:
+                if self._last_good_frame is not None and self._source:
                     self._source.capture_frame(self._last_good_frame)
 
             elapsed = loop.time() - frame_start
@@ -533,6 +540,27 @@ class BrowserScreenShare:
             logger.warning(f"Could not start cursor animation to {locator_or_selector}: {e}")
         return 0, None
 
+    async def take_screenshot(self, width: int = 640, height: int = 360, quality: int = 50) -> bytes | None:
+        """Take a one-off JPEG screenshot resized for LLM vision input.
+
+        Returns JPEG bytes or None if no page is available.
+        Uses _page_lock to avoid conflicts with the capture loop.
+        """
+        if not self._page:
+            return None
+        try:
+            async with self._page_lock:
+                raw = await self._page.screenshot(type="jpeg", quality=quality)
+            img = Image.open(io.BytesIO(raw))
+            if img.size != (width, height):
+                img = img.resize((width, height))
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=quality)
+            return buf.getvalue()
+        except Exception as e:
+            logger.warning(f"take_screenshot failed: {e}")
+            return None
+
     async def navigate(self, url: str):
         """Navigate browser to a new URL."""
         if self._page:
@@ -547,7 +575,7 @@ class BrowserScreenShare:
             # Phase 1: resolve element and start cursor animation (brief lock)
             async with self._page_lock:
                 await self._inject_cursor()
-                duration, locator = await self._start_cursor_animation(selector, duration_ms=700)
+                duration, locator = await self._start_cursor_animation(selector, duration_ms=400)
 
             if locator is None:
                 raise Exception(
@@ -620,29 +648,28 @@ class BrowserScreenShare:
             # Phase 3: animate cursor to the already-resolved element
             async with self._page_lock:
                 await self._inject_cursor()
-                cursor_duration, _ = await self._start_cursor_animation(locator, duration_ms=600)
+                cursor_duration, _ = await self._start_cursor_animation(locator, duration_ms=400)
 
             if cursor_duration > 0:
                 await asyncio.sleep(cursor_duration / 1000 + 0.05)
 
     async def highlight_element(self, selector: str):
-        """Move cursor to element, then add a visual highlight around it."""
+        """Move cursor to element, then add a visual highlight around it.
+
+        Cursor animation is fire-and-forget — the highlight is applied immediately
+        and the tool returns without waiting for the cursor to arrive.
+        """
         if self._page:
-            # Phase 1: resolve element and start cursor animation
+            # Phase 1: resolve element, start cursor animation, and apply highlight (single lock)
             async with self._page_lock:
                 await self._inject_cursor()
-                duration, locator = await self._start_cursor_animation(selector, duration_ms=600)
+                _duration, locator = await self._start_cursor_animation(selector, duration_ms=600)
 
-            if locator is None:
-                logger.warning(f"Could not highlight element: {selector}")
-                return
+                if locator is None:
+                    logger.warning(f"Could not highlight element: {selector}")
+                    return
 
-            # Phase 2: wait for animation WITHOUT holding lock
-            if duration > 0:
-                await asyncio.sleep(duration / 1000 + 0.05)
-
-            # Phase 3: apply the highlight via the resolved locator (bypasses querySelector)
-            async with self._page_lock:
+                # Apply highlight immediately — no need to wait for cursor animation
                 await locator.evaluate("""
                     (el) => {
                         el.style.outline = '3px solid #FF6B00';
@@ -653,6 +680,105 @@ class BrowserScreenShare:
                         }, 3000);
                     }
                 """)
+
+    async def type_in_field(self, field_label: str, text: str):
+        """Find a form field by label/placeholder/aria-label, move cursor to it, and type text."""
+        if not self._page:
+            raise Exception("Browser not started")
+
+        async with self._page_lock:
+            await self._inject_cursor()
+
+            # Try multiple strategies to find the field
+            locator = None
+
+            # 1. get_by_label (associated <label> or aria-label)
+            try:
+                loc = self._page.get_by_label(field_label)
+                if await loc.count() > 0:
+                    box = await loc.first.bounding_box(timeout=2000)
+                    if box:
+                        locator = loc.first
+            except Exception:
+                pass
+
+            # 2. get_by_placeholder
+            if not locator:
+                try:
+                    loc = self._page.get_by_placeholder(field_label)
+                    if await loc.count() > 0:
+                        box = await loc.first.bounding_box(timeout=2000)
+                        if box:
+                            locator = loc.first
+                except Exception:
+                    pass
+
+            # 3. get_by_role textbox with name
+            if not locator:
+                try:
+                    loc = self._page.get_by_role("textbox", name=field_label)
+                    if await loc.count() > 0:
+                        box = await loc.first.bounding_box(timeout=2000)
+                        if box:
+                            locator = loc.first
+                except Exception:
+                    pass
+
+            if not locator:
+                raise Exception(f"Could not find field '{field_label}'")
+
+            # Animate cursor to field
+            duration, _ = await self._start_cursor_animation(locator, duration_ms=500)
+
+        # Wait for cursor animation
+        if duration > 0:
+            await asyncio.sleep(duration / 1000 + 0.05)
+
+        # Click and type
+        async with self._page_lock:
+            await locator.click(timeout=3000)
+            await locator.fill(text, timeout=3000)
+
+        logger.info(f"Typed '{text}' into field '{field_label}'")
+
+    async def hover(self, selector: str):
+        """Move cursor to element and hover (no click). Shows tooltips etc."""
+        if not self._page:
+            raise Exception("Browser not started")
+
+        # Phase 1: resolve element and start cursor animation
+        async with self._page_lock:
+            await self._inject_cursor()
+            duration, locator = await self._start_cursor_animation(selector, duration_ms=600)
+
+        if locator is None:
+            raise Exception(f"Could not find element '{selector}'")
+
+        # Phase 2: brief wait for cursor to get close (don't need full animation)
+        if duration > 0:
+            await asyncio.sleep(0.2)
+
+        # Phase 3: trigger hover via Playwright
+        async with self._page_lock:
+            await locator.hover(timeout=3000)
+
+        logger.info(f"Hovering over '{selector}'")
+
+    async def move_mouse_to(self, selector: str):
+        """Move cursor to element visually without triggering hover events.
+
+        Fire-and-forget — starts the animation and returns immediately.
+        The animation plays on the screen share while the agent speaks.
+        """
+        if not self._page:
+            raise Exception("Browser not started")
+
+        async with self._page_lock:
+            await self._inject_cursor()
+            _duration, locator = await self._start_cursor_animation(selector, duration_ms=600)
+
+        if locator is None:
+            raise Exception(f"Could not find element '{selector}'")
 
     async def get_page_content(self) -> str:
         """Get visible text content of the current page."""
@@ -668,6 +794,7 @@ class BrowserScreenShare:
 
     async def stop(self):
         """Clean up browser, stop capture, and unpublish track."""
+        self._running = False  # Signal capture loop to stop before closing browser
         await self.stop_publishing()
         try:
             if self._browser:
@@ -676,4 +803,7 @@ class BrowserScreenShare:
                 await self._playwright.stop()
         except Exception as e:
             logger.warning(f"Cleanup error (non-fatal): {e}")
+        self._page = None
+        self._browser = None
+        self._playwright = None
         logger.info("Screen share stopped")

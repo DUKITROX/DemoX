@@ -5,9 +5,10 @@ import {
   LiveKitRoom,
   RoomAudioRenderer,
   useConnectionState,
+  useRoomContext,
 } from "@livekit/components-react";
 import { ConnectionState } from "livekit-client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AgentScreenShare } from "./AgentScreenShare";
 import { UserMicControl } from "./UserMicControl";
 import { AgentStatus } from "./AgentStatus";
@@ -36,9 +37,69 @@ export function CallView({ roomId, token, livekitUrl }: CallViewProps) {
   );
 }
 
+interface ChatMessage {
+  id: string;
+  text: string;
+  timestamp: number;
+  speaker: "You";
+}
+
+function ChatInput({ onMessageSent }: { onMessageSent: (msg: ChatMessage) => void }) {
+  const room = useRoomContext();
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const handleSend = useCallback(async () => {
+    const trimmed = text.trim();
+    if (!trimmed || sending) return;
+
+    setSending(true);
+    try {
+      await room.localParticipant.sendText(trimmed, { topic: "lk.chat" });
+      onMessageSent({
+        id: `chat-${Date.now()}`,
+        text: trimmed,
+        timestamp: Date.now(),
+        speaker: "You",
+      });
+      setText("");
+    } catch (e) {
+      console.error("Failed to send chat message:", e);
+    } finally {
+      setSending(false);
+    }
+  }, [text, sending, room, onMessageSent]);
+
+  return (
+    <div className="flex gap-2 px-4 py-3 border-t border-neutral-800">
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+        placeholder="Type a message..."
+        disabled={sending}
+        className="flex-1 bg-neutral-800 text-neutral-200 text-sm rounded-md px-3 py-2 border border-neutral-700 focus:outline-none focus:border-[var(--accent)] placeholder-neutral-500"
+      />
+      <button
+        onClick={handleSend}
+        disabled={sending || !text.trim()}
+        className="px-3 py-2 bg-[var(--accent)] text-white text-sm rounded-md hover:opacity-90 disabled:opacity-40 transition-opacity"
+      >
+        Send
+      </button>
+    </div>
+  );
+}
+
 function RoomContent({ roomId }: { roomId: string }) {
   const connectionState = useConnectionState();
   const [chatVisible, setChatVisible] = useState(true);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
+  const handleMessageSent = useCallback((msg: ChatMessage) => {
+    setChatMessages((prev) => [...prev, msg]);
+  }, []);
 
   if (connectionState === ConnectionState.Connecting) {
     return (
@@ -91,8 +152,9 @@ function RoomContent({ roomId }: { roomId: string }) {
               Chat
             </div>
             <div className="flex-1 overflow-hidden px-4 py-3">
-              <Transcript />
+              <Transcript chatMessages={chatMessages} />
             </div>
+            <ChatInput onMessageSent={handleMessageSent} />
           </div>
         )}
       </div>

@@ -21,7 +21,6 @@ from backend.json_logger import setup_json_logger, log_event
 logger = setup_json_logger("researcher", "researcher.log")
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
 MAX_PAGES = 4
 
 
@@ -180,8 +179,9 @@ async def crawl_pages(browser, start_url: str) -> list[dict]:
 
 async def research_website(room_id: str, website_url: str):
     """Main research pipeline — crawl, extract, summarize, publish."""
+    from backend.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL
     r = aioredis.from_url(REDIS_URL, decode_responses=True)
-    client = AsyncOpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENROUTER_API_KEY)
+    client = AsyncOpenAI(base_url=OPENROUTER_BASE_URL, api_key=OPENROUTER_API_KEY)
 
     # Publish initial status
     await r.set(
